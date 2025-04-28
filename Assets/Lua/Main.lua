@@ -5,11 +5,11 @@ print("======= System Boot =======")
 -- 初始化核心模块 --------------------------------------------------
 local ModuleManager = require("Core.ModuleManager")
 local EventManager = require("Core.EventManager")
-local UIMgr = require("UI.UIMgr") -- 现在这个文件已真实存在
+local UIMgr = require("UI.UIMgr")
 
 -- 模块注册 --------------------------------------------------------
 -- 注册登录模块（示例）
-local LoginModule = Class("LoginModule")
+local LoginModule = Class.Define("LoginModule")
 function LoginModule:Enter()
     print("[Module] Enter LoginModule")
 
@@ -32,7 +32,7 @@ end
 ModuleManager.Register("Login", LoginModule)
 
 -- 注册主界面模块（示例）
-local MainModule = Class("MainModule")
+local MainModule = Class.Define("MainModule")
 function MainModule:Enter()
     print("[Module] Enter MainModule")
     -- 这里可以添加主界面初始化逻辑

@@ -32,14 +32,13 @@ namespace XLua.CSObjectWrap
 			Utils.EndObjectRegister(type, L, translator, null, null,
 			    null, null, null);
 
-		    Utils.BeginClassRegister(type, L, __CreateInstance, 1, 1, 1);
+		    Utils.BeginClassRegister(type, L, __CreateInstance, 1, 1, 0);
 			
 			
             
 			Utils.RegisterFunc(L, Utils.CLS_GETTER_IDX, "Instance", _g_get_Instance);
             
-			Utils.RegisterFunc(L, Utils.CLS_SETTER_IDX, "Instance", _s_set_Instance);
-            
+			
 			
 			Utils.EndClassRegister(type, L, translator);
         }
@@ -119,19 +118,6 @@ namespace XLua.CSObjectWrap
         }
         
         
-        
-        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-        static int _s_set_Instance(RealStatePtr L)
-        {
-		    try {
-                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
-			    UIManager.Instance = (UIManager)translator.GetObject(L, 1, typeof(UIManager));
-            
-            } catch(System.Exception gen_e) {
-                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
-            }
-            return 0;
-        }
         
 		
 		

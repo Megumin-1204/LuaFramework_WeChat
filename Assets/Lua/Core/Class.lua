@@ -1,7 +1,6 @@
 -- Core/Class.lua
 local Class = {}
 
--- 类定义方法
 function Class.Define(className, baseClass)
     local cls = {
         __className = className,
@@ -27,5 +26,4 @@ function Class.Define(className, baseClass)
     return cls
 end
 
--- 导出方式（不污染全局）
 return Class
