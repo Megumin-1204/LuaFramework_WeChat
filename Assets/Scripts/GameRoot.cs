@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using UnityEngine;
 using XLua;
+using System.Collections;
+using System.Collections.Generic;
 
 [DisallowMultipleComponent] // 防止重复挂载
 public class GameRoot : MonoBehaviour
@@ -39,18 +41,33 @@ public class GameRoot : MonoBehaviour
     // 核心框架初始化 -------------------------------------------------------------
     private void InitializeCoreFramework()
     {
-        try
+        StartCoroutine(InitializeStepByStep());
+    }
+
+// GameRoot.cs 修改初始化协程
+    private IEnumerator InitializeStepByStep()
+    {
+        // 阶段1：初始化C#管理器
+        Log("[INIT] 开始初始化C#管理器");
+        InitializeManagers();
+    
+        // 阶段2：等待UIManager完全就绪
+        int maxWaitFrames = 10;
+        while (UIManager.Instance == null && maxWaitFrames-- > 0)
         {
-            InitializeManagers();
-            InitializeLuaEnv();
+            Log($"[INIT] 等待UIManager初始化 (剩余等待帧数: {maxWaitFrames})");
+            yield return null;
         }
-        catch (Exception ex)
+    
+        if (UIManager.Instance == null)
         {
-            Debug.LogError($"框架初始化失败: {ex.Message}\n{ex.StackTrace}");
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            Debug.LogError("UIManager初始化超时！");
+            yield break;
         }
+
+        // 阶段3：初始化Lua环境
+        Log("[INIT] 开始初始化Lua虚拟机");
+        InitializeLuaEnv();
     }
 
     // 管理器初始化 ---------------------------------------------------------------
@@ -93,24 +110,19 @@ public class GameRoot : MonoBehaviour
     // Lua加载器配置 -------------------------------------------------------------
     private void ConfigureLuaLoader()
     {
-        _luaEnv.AddLoader((ref string filepath) =>
-        {
-            // 转换Lua模块路径：将.转换为路径分隔符
-            var path = Path.Combine(
-                Application.dataPath, 
-                "Lua", 
-                filepath.Replace('.', '/') + ".lua"
-            );
-
-            Log($"[LUA] 尝试加载Lua文件: {path}");
-            
-            if (File.Exists(path))
+        _luaEnv.AddLoader((ref string filepath) => {
+            // 优先加载xLua内置脚本
+            if (filepath == "xlua") 
             {
-                return File.ReadAllBytes(path);
+                string xluaPath = "XLua.Resources.xlua";
+                TextAsset asset = Resources.Load<TextAsset>(xluaPath);
+                return asset.bytes;
             }
-            
-            LogWarning($"Lua文件未找到: {path}");
-            return null;
+
+            // 原有加载逻辑
+            string path = Path.Combine(Application.dataPath, "Lua", 
+                filepath.Replace('.', '/') + ".lua");
+            return File.Exists(path) ? File.ReadAllBytes(path) : null;
         });
     }
 
@@ -129,6 +141,18 @@ public class GameRoot : MonoBehaviour
         }
     }
     #endregion
+    
+    // 在GameRoot类中添加
+    public void LuaInvoke(Action action, float delay)
+    {
+        StartCoroutine(InvokeRoutine(action, delay));
+    }
+
+    private IEnumerator InvokeRoutine(Action action, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        action?.Invoke();
+    }
 
     #region 生命周期管理
     void OnDestroy()

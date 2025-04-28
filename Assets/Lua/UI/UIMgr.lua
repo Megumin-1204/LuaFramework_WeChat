@@ -13,16 +13,31 @@ end
 
 -- 私有方法：安全获取C# UIManager实例
 local function getUIManager()
-    if not CS or not CS.UIManager then
-        log("CS.UIManager 命名空间不存在")
+    if not CS then
+        log("CS命名空间不存在")
         return nil
     end
 
+    -- 检查CS.UIManager类型
+    log(string.format("CS.UIManager类型：%s", type(CS.UIManager)))
+
+    if not CS.UIManager then
+        log("CS.UIManager类未找到，请检查：")
+        log("1. XLua是否生成对应绑定代码")
+        log("2. 类名是否拼写正确")
+        return nil
+    end
+
+    -- 检查Instance有效性
+    log(string.format("尝试获取UIManager.Instance，当前状态：%s", tostring(CS.UIManager.Instance)))
+
     local instance = CS.UIManager.Instance
     if not instance then
-        log("UIManager实例尚未初始化")
+        log("UIManager实例尚未初始化，可能原因：")
+        log("- C#单例未在Awake初始化")
+        log("- 组件未正确挂载")
     else
-        log(string.format("成功获取UIManager实例 (C#对象: %s)", tostring(instance)))
+        log(string.format("成功获取UIManager实例 (类型：%s)", type(instance)))
     end
 
     return instance
@@ -74,11 +89,13 @@ function UIMgr.ShowPanel(panelName, params)
         end
     end
 
-    -- 调用C#层方法（使用xlua的异常捕获）
-    xlua.cast(csUIMgr, typeof(CS.UIManager)):ShowPanel(
-            panelName,
-            xlua.cs(callback)
-    )
+    -- 添加类型校验
+    --local callbackWrapper = xlua.cs(callback)
+    --if type(callbackWrapper) ~= "userdata" then
+    --    error("Lua函数转换C#委托失败")
+    --end
+
+    CS.UIManager.Instance:ShowPanel(panelName, callbackWrapper)
 end
 
 -- 关闭面板

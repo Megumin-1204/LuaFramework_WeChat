@@ -87,9 +87,9 @@ namespace XLua.CSObjectWrap
                 
                 {
                     string _panelName = LuaAPI.lua_tostring(L, 2);
-                    XLua.LuaFunction _onLoaded = (XLua.LuaFunction)translator.GetObject(L, 3, typeof(XLua.LuaFunction));
+                    XLua.LuaFunction _callback = (XLua.LuaFunction)translator.GetObject(L, 3, typeof(XLua.LuaFunction));
                     
-                    gen_to_be_invoked.ShowPanel( _panelName, _onLoaded );
+                    gen_to_be_invoked.ShowPanel( _panelName, _callback );
                     
                     
                     

@@ -13,6 +13,10 @@ public static class XLuaGenConfig
         typeof(WeChatManager),   // 之前创建的微信管理器
         typeof(GameObject),
         typeof(Transform),
-        typeof(Button)
+        typeof(Button),
+        typeof(Canvas),
+        typeof(System.Action),
+        typeof(System.Func<>),
+        typeof(GameRoot),
     };
 }

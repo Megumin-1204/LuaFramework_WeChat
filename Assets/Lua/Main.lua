@@ -1,3 +1,11 @@
+--package.cpath = package.cpath .. ';C:/Users/Administrator/AppData/Roaming/JetBrains/Rider2024.3/plugins/EmmyLua/debugger/emmy/windows/x64/?.dll'
+--local dbg = require('emmy_core')
+--dbg.tcpConnect('localhost', 9966)
+
+print("===== xLua环境验证 =====")
+print("xlua类型:", type(xlua))
+print("cs函数类型:", type(xlua.cs))
+
 -- Main.lua
 local Class = require("Core.Class")
 print("======= System Boot =======")
@@ -52,7 +60,8 @@ end)
 ModuleManager.Switch("Login")
 
 -- 派发测试事件（延迟3秒执行）
-CS.UnityEngine.MonoBehaviour.Invoke(function()
+local gameRoot = CS.GameRoot.Instance
+gameRoot:Invoke(function()
     EventManager.Dispatch("TEST_EVENT", {
         msg = "System Initialized",
         code = 200

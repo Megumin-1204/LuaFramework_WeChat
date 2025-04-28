@@ -5,6 +5,7 @@
 	<assembly fullname="Assembly-CSharp">
 	    <type fullname="UIManager" preserve="all"/>
 		<type fullname="WeChatManager" preserve="all"/>
+		<type fullname="GameRoot" preserve="all"/>
 		<type fullname="Tutorial.BaseClass" preserve="all"/>
 		<type fullname="Tutorial.TestEnum" preserve="all"/>
 		<type fullname="Tutorial.DerivedClass" preserve="all"/>
@@ -57,6 +58,11 @@
 
 	<assembly fullname="UnityEngine.UI">
 	    <type fullname="UnityEngine.UI.Button" preserve="all"/>
+		
+	</assembly>
+
+	<assembly fullname="UnityEngine.UIModule">
+	    <type fullname="UnityEngine.Canvas" preserve="all"/>
 		
 	</assembly>
 
