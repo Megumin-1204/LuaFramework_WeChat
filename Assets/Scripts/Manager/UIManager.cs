@@ -123,16 +123,31 @@ public class UIManager : MonoBehaviour
         StartCoroutine(LoadPanel(panelName, callback));
     }
 
-    private IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
+    IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
     {
-        // 从Resources加载
-        var request = Resources.LoadAsync<GameObject>("UI/" + panelName);
+        var path = "UI/" + panelName;
+        Debug.Log($"[UIManager] ▶️ Resources.LoadAsync 正在尝试加载：\"{path}\"");
+        var request = Resources.LoadAsync<GameObject>(path);
         yield return request;
-        
-        var panel = Instantiate(request.asset as GameObject, _uiRoot);
+
+        if (request.asset == null)
+        {
+            Debug.LogError($"资源加载失败：{path}");
+            yield break;
+        }
+
+        var prefab = request.asset as GameObject;
+        if (prefab == null)
+        {
+            Debug.LogError($"资源类型错误：{path} 不是GameObject");
+            yield break;
+        }
+
+        var panel = Instantiate(prefab, _uiRoot);
         uiDict.Add(panelName, panel);
-        
-        // 调用Lua回调
-        onLoaded.Call(panel);
+        if (onLoaded != null)
+            onLoaded.Call(panel);
+        else
+            Debug.LogWarning($"[UIManager] onLoaded 为 null，面板 {panelName} 无回调被调用");
     }
 }

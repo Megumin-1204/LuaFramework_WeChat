@@ -147,8 +147,8 @@ MonoBehaviour:
     y: 0
     width: 267
     height: 661
-  m_MinSize: {x: 202, y: 221}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -323,7 +323,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/XLua/Examples
+    - Assets/Scenes
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -331,16 +331,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/XLua/Examples
+  - Assets/Scenes
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\framework\TestWeChat\LuaFramework_WeChat
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 179}
-    m_SelectedIDs: d61e0000
-    m_LastClickedID: 7894
-    m_ExpandedIDs: 000000005e1e0000d61e0000a05e0000
+    scrollPos: {x: 0, y: 55}
+    m_SelectedIDs: 3e5b0000
+    m_LastClickedID: 23358
+    m_ExpandedIDs: 00000000fc5a00003c5b0000425b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -356,7 +356,7 @@ MonoBehaviour:
       m_IsRenaming: 0
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
-      m_ClientGUIView: {fileID: 0}
+      m_ClientGUIView: {fileID: 3}
     m_SearchString: 
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
@@ -368,7 +368,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000a05e0000
+    m_ExpandedIDs: 00000000fc5a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -508,9 +508,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 725e0000
-      m_LastClickedID: 24178
-      m_ExpandedIDs: eeeafffff4ffffff
+      m_SelectedIDs: 0a5d0000
+      m_LastClickedID: 0
+      m_ExpandedIDs: 6ae6ffff32e7ffff3eecffff94ecffff94edffff30fbfffff4ffffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -598,7 +598,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-scene-view-toolbar
@@ -624,7 +624,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-transform-toolbar

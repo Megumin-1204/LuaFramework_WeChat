@@ -55,6 +55,7 @@
     <Compile Include="Assets\XLua\Gen\UnityEngine_ResourcesWrap.cs" />
     <Compile Include="Assets\XLua\Examples\08_Hotfix\HotfixTest.cs" />
     <Compile Include="Assets\XLua\Gen\XLuaTest_Foo2ParentWrap.cs" />
+    <Compile Include="Assets\Scenes\Test.cs" />
     <Compile Include="Assets\XLua\Gen\Tutorial_ICalcWrap.cs" />
     <Compile Include="Assets\XLua\Src\TemplateEngine\TemplateEngine.cs" />
     <Compile Include="Assets\XLua\Gen\XLuaTest_Foo1ChildWrap.cs" />
