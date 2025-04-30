@@ -355,6 +355,7 @@
 "Assets/Scenes/Test.cs"
 "Assets/Scripts/GameRoot.cs"
 "Assets/Scripts/Manager/UIManager.cs"
+"Assets/Scripts/Manager/UIMaskManager.cs"
 "Assets/Scripts/Manager/WeChatManager.cs"
 "Assets/Scripts/XLuaGenConfig.cs"
 "Assets/XLua/Examples/01_Helloworld/Helloworld.cs"
