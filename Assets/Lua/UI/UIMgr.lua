@@ -88,14 +88,8 @@ function UIMgr.ShowPanel(panelName, params)
             pcall(params.onLoaded, panel)
         end
     end
-
-    -- 添加类型校验
-    local callbackWrapper = xlua.cs(callback)
-    if type(callbackWrapper) ~= "userdata" then
-        error("Lua函数转换C#委托失败")
-    end
-
-    CS.UIManager.Instance:ShowPanel(panelName, callbackWrapper)
+    
+    CS.UIManager.Instance:ShowPanel(panelName, callback)
 end
 
 -- 关闭面板
