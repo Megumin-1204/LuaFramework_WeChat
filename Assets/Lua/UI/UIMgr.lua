@@ -82,14 +82,6 @@ function UIMgr.ShowPanel(panelName, params)
 
         log(string.format("面板加载成功: %s (实例ID: %s)", panelName, go:GetInstanceID()))
 
-        -- 动态绑定Lua逻辑
-        --local success, panelClass = pcall(require, "UI."..panelName)
-        --if not success then
-        --    log(string.format("找不到Lua面板类: UI.%s", panelName))
-        --    CS.UnityEngine.Object.Destroy(go)
-        --    return
-        --end
-
         local ok, res = pcall(require, "UI."..panelName)
         if not ok then
             log(string.format("require UI.%s 失败，错误：%s", panelName, tostring(res)))
@@ -106,7 +98,7 @@ function UIMgr.ShowPanel(panelName, params)
         end
     end
     
-    CS.UIManager.Instance:ShowPanel(panelName, callback)
+    csUIMgr:ShowPanel(panelName, callback)
 end
 
 -- 关闭面板

@@ -111,6 +111,13 @@ public class UIManager : MonoBehaviour
 
     public void ShowPanel(string panelName, LuaFunction callback)
     {
+        // 如果 _uiRoot 还没初始化，就再跑一次
+        if (_uiRoot == null)
+        {
+            Debug.LogWarning("[UIManager] _uiRoot 为 null，尝试在 ShowPanel 前重新初始化");
+            InitializeUIRoot();
+        }
+    
         // 空引用检查
         if (string.IsNullOrEmpty(panelName))
         {
@@ -122,6 +129,7 @@ public class UIManager : MonoBehaviour
         if (this == null) return;
         StartCoroutine(LoadPanel(panelName, callback));
     }
+
 
     IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
     {
@@ -143,11 +151,26 @@ public class UIManager : MonoBehaviour
             yield break;
         }
 
-        var panel = Instantiate(prefab, _uiRoot);
+        // 1) 先 Instantiate 不附加父对象
+        var panel = Instantiate(prefab);
+        // 2) 打日志确认我们会挂到哪个 UIRoot 下
+        if (_uiRoot == null)
+            Debug.LogError("[UIManager] _uiRoot 为 null！请检查 InitializeUIRoot 是否执行");
+        else
+            Debug.Log($"[UIManager] 挂载到 UIRoot: {_uiRoot.name}");
+
+        // 3) 手动 SetParent，并把位置/缩放都复位
+        panel.transform.SetParent(_uiRoot, false);
+
         uiDict.Add(panelName, panel);
+
+        // 4) 再打个日志，确认 parent 是否正确
+        Debug.Log($"[UIManager] {panel.name} 的 parent: {panel.transform.parent.name}");
+
         if (onLoaded != null)
             onLoaded.Call(panel);
         else
             Debug.LogWarning($"[UIManager] onLoaded 为 null，面板 {panelName} 无回调被调用");
     }
+
 }
