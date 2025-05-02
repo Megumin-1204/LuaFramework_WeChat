@@ -51,6 +51,14 @@ function UIMgr.ShowPanel(panelName, params)
     end
 
     params = params or {}
+    -- 支持两种调用模式：
+    -- 1. UIMgr.ShowPanel(name, callbackFunction)
+    -- 2. UIMgr.ShowPanel(name, { onLoaded = fn1, onFailed = fn2 })
+    if type(params) == "function" then
+        params = { onLoaded = params }
+    else
+        params = params or {}
+    end
     
     local json = require("Third.json")
     -- 日志输出
@@ -66,25 +74,34 @@ function UIMgr.ShowPanel(panelName, params)
     local callback = function(go)
         if not go or go:Equals(nil) then
             log(string.format("面板加载失败: %s", panelName))
-            if params.onFailed then
-                pcall(params.onFailed, "资源加载失败")
-            end
+                if type(params.onFailed) == "function" then
+                    pcall(params.onFailed, "资源加载失败")
+                end
             return
         end
 
         log(string.format("面板加载成功: %s (实例ID: %s)", panelName, go:GetInstanceID()))
 
         -- 动态绑定Lua逻辑
-        local success, panelClass = pcall(require, "UI."..panelName)
-        if not success then
-            log(string.format("找不到Lua面板类: UI.%s", panelName))
+        --local success, panelClass = pcall(require, "UI."..panelName)
+        --if not success then
+        --    log(string.format("找不到Lua面板类: UI.%s", panelName))
+        --    CS.UnityEngine.Object.Destroy(go)
+        --    return
+        --end
+
+        local ok, res = pcall(require, "UI."..panelName)
+        if not ok then
+            log(string.format("require UI.%s 失败，错误：%s", panelName, tostring(res)))
             CS.UnityEngine.Object.Destroy(go)
             return
         end
+        local panelClass = res
+
 
         -- 初始化面板实例
         local panel = panelClass.New(go)
-        if params.onLoaded then
+        if type(params.onLoaded) == "function" then
             pcall(params.onLoaded, panel)
         end
     end

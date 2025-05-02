@@ -1,17 +1,30 @@
+-- Assets/Lua/Third/Json.lua
 -- 使用极简Json实现
+
 local Json = {}
 
+-- 为了不遮蔽全局 type，先把它本地化
+local _type = type
+
 function Json.encode(data)
-    -- 简单实现，仅处理基础类型
-    local type = type(data)
-    if type == "table" then
+    local t = _type(data)
+    if t == "table" then
         local s = "{"
-        for k,v in pairs(data) do
-            if type(k) ~= "number" then k = '"'..k..'"' end
-            s = s .. "["..k.."]=" .. Json.encode(v) .. ","
+        for k, v in pairs(data) do
+            local keyStr
+            if _type(k) ~= "number" then
+                keyStr = '"' .. tostring(k) .. '"'
+            else
+                keyStr = tostring(k)
+            end
+            s = s .. "[" .. keyStr .. "]=" .. Json.encode(v) .. ","
         end
-        return s:sub(1, -2) .. "}"
-    elseif type == "string" then
+        -- 去掉最后多余一个逗号，如果只有一个元素也能处理
+        if s:sub(-1) == "," then
+            s = s:sub(1, -2)
+        end
+        return s .. "}"
+    elseif t == "string" then
         return '"' .. data .. '"'
     else
         return tostring(data)

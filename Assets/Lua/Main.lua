@@ -9,6 +9,7 @@ print("cs函数类型:", type(xlua.cs))
 -- Main.lua
 local Class = require("Core.Class")
 print("======= System Boot =======")
+_G.Class = require("Core.Class")
 
 -- 初始化核心模块 --------------------------------------------------
 local ModuleManager = require("Core.ModuleManager")
@@ -17,7 +18,7 @@ local UIMgr = require("UI.UIMgr")
 
 -- 模块注册 --------------------------------------------------------
 -- 注册登录模块（示例）
-local LoginModule = Class.Define("LoginModule")
+local LoginModule = Class("LoginModule")
 function LoginModule:Enter()
     print("[Module] Enter LoginModule")
 
@@ -40,7 +41,7 @@ end
 ModuleManager.Register("Login", LoginModule)
 
 -- 注册主界面模块（示例）
-local MainModule = Class.Define("MainModule")
+local MainModule = Class("MainModule")
 function MainModule:Enter()
     print("[Module] Enter MainModule")
     -- 这里可以添加主界面初始化逻辑
@@ -61,11 +62,12 @@ ModuleManager.Switch("Login")
 
 -- 派发测试事件（延迟3秒执行）
 local gameRoot = CS.GameRoot.Instance
-gameRoot:Invoke(function()
+gameRoot:LuaInvoke(function()
     EventManager.Dispatch("TEST_EVENT", {
         msg = "System Initialized",
         code = 200
     })
 end, 3)
+
 
 print("======= System Ready =======")
