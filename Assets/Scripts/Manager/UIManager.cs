@@ -12,16 +12,19 @@ public class UIManager : MonoBehaviour
         get {
             if (_instance == null) 
             {
-                // 双重校验锁保证线程安全
-                lock(typeof(UIManager))
+                lock (typeof(UIManager))
                 {
+                    // 先尝试在场景里找
                     _instance = FindObjectOfType<UIManager>();
                     if (_instance == null)
                     {
+                        // 如果找不到，就新建一个
                         var go = new GameObject("UIManager");
                         _instance = go.AddComponent<UIManager>();
                         DontDestroyOnLoad(go);
                     }
+                    // **确保 _uiRoot 在第一次拿 Instance 的时候就被初始化**
+                    _instance.InitializeUIRoot();
                 }
             }
             return _instance;
@@ -44,8 +47,9 @@ public class UIManager : MonoBehaviour
     }
     
     // 安全初始化UIRoot
-    void InitializeUIRoot()
+    public void InitializeUIRoot()
     {
+        if (_uiRoot != null) return;    // 幂等
         // 场景中已存在的UIRoot检测
         var existingRoot = GameObject.Find("UIRoot");
         if (existingRoot != null)
@@ -55,7 +59,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        // 安全创建流程
+        // 创建新的 UIRoot
         CreateNewUIRoot();
     }
     
@@ -105,14 +109,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowPanel(string panelName, LuaFunction callback)
     {
-        // 如果 _uiRoot 还没初始化，就再跑一次
-        if (_uiRoot == null)
-        {
-            Debug.LogWarning("[UIManager] _uiRoot 为 null，尝试在 ShowPanel 前重新初始化");
-            InitializeUIRoot();
-        }
-    
-        // 空引用检查
+        // 参数验证
         if (string.IsNullOrEmpty(panelName))
         {
             Debug.LogError("无效的面板名称");
@@ -120,13 +117,25 @@ public class UIManager : MonoBehaviour
         }
 
         // 协程安全启动
-        if (this == null) return;
         StartCoroutine(LoadPanel(panelName, callback));
     }
 
-
-    IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
+    
+    private IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
     {
+        // 保险：如果 _uiRoot 尚未初始化，则主动初始化一次
+        if (_uiRoot == null)
+        {
+            InitializeUIRoot();
+        }
+
+        // 此时 _uiRoot 应该已非 null
+        if (_uiRoot == null)
+        {
+            Debug.LogError("[UIManager] 初始化 UIRoot 失败，无法加载面板：" + panelName);
+            yield break;
+        }
+
         var path = "UI/" + panelName;
         Debug.Log($"[UIManager] ▶️ Resources.LoadAsync 正在尝试加载：\"{path}\"");
         var request = Resources.LoadAsync<GameObject>(path);
@@ -145,22 +154,13 @@ public class UIManager : MonoBehaviour
             yield break;
         }
 
-        // 1) 先 Instantiate 不附加父对象
+        // 实例化并手动挂到 UIRoot 下
         var panel = Instantiate(prefab);
-        // 2) 打日志确认我们会挂到哪个 UIRoot 下
-        if (_uiRoot == null)
-            Debug.LogError("[UIManager] _uiRoot 为 null！请检查 InitializeUIRoot 是否执行");
-        else
-            Debug.Log($"[UIManager] 挂载到 UIRoot: {_uiRoot.name}");
-
-        // 3) 手动 SetParent，并把位置/缩放都复位
         panel.transform.SetParent(_uiRoot, false);
 
-        uiDict.Add(panelName, panel);
+        uiDict[panelName] = panel;
 
-        // 4) 再打个日志，确认 parent 是否正确
-        Debug.Log($"[UIManager] {panel.name} 的 parent: {panel.transform.parent.name}");
-
+        // 回调
         if (onLoaded != null)
             onLoaded.Call(panel);
         else
