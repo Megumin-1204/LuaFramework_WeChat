@@ -5,10 +5,10 @@ local TestPanel = Class("TestPanel", BasePanel)
 
 function TestPanel:Init()
     -- 缓存特有组件
-    self.btnTest  = self.transform:Find("BtnTest"):GetComponent(typeof(CS.UnityEngine.UI.Button))
-    self.txtTitle = self.transform:Find("TxtTitle"):GetComponent(typeof(CS.UnityEngine.UI.Text))
+    self.BtnTest  = self.transform:Find("BtnTest"):GetComponent(typeof(CS.UnityEngine.UI.Button))
+    self.TextTitle = self.transform:Find("TextTitle"):GetComponent(typeof(CS.UnityEngine.UI.Text))
     -- 初始化显示
-    self.txtTitle.text = "这是 TestPanel"
+    self.TextTitle.text = "这是 TestPanel"
 end
 
 -- 面板显示后钩子
@@ -22,8 +22,8 @@ end
 
 -- 对外注册按钮回调
 function TestPanel:SetClickCallback(cb)
-    if self.btnTest then
-        CS.XLuaHelper.AddClick(self.btnTest.gameObject, function()
+    if self.BtnTest then
+        CS.XLuaHelper.AddClick(self.BtnTest.gameObject, function()
             print("[TestPanel] 按钮被点击")
             if cb then pcall(cb) end
         end)

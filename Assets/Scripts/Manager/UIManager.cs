@@ -61,19 +61,10 @@ public class UIManager : MonoBehaviour
     
     void CreateNewUIRoot()
     {
-        // 分步创建对象
         var rootGO = new GameObject("UIRoot");
-        if (rootGO == null)
-        {
-            Debug.LogError("UIRoot创建失败！");
-            return;
-        }
-
-        // 立即设置不销毁
         DontDestroyOnLoad(rootGO);
         _uiRoot = rootGO.transform;
 
-        // 分步添加组件
         TryAddComponent<Canvas>(rootGO, canvas =>
         {
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -82,13 +73,16 @@ public class UIManager : MonoBehaviour
         TryAddComponent<CanvasScaler>(rootGO, scaler =>
         {
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
+            // 竖屏设计分辨率
+            scaler.referenceResolution = new Vector2(1024, 1920);
+            // 更偏重高度适配
+            scaler.matchWidthOrHeight = 1f;
         });
 
         rootGO.AddComponent<GraphicRaycaster>();
-        
-        Debug.Log("UIRoot创建成功");
+        Debug.Log("UIRoot（竖屏1024×1920）创建成功");
     }
+
     
     // 安全组件添加方法
     void TryAddComponent<T>(GameObject target, System.Action<T> onAdded = null) where T : Component
