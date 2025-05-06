@@ -1,1 +1,1 @@
-D:\framework\TestFramework\LuaFramework_WeChat
+D:\framework\TestWeChat\LuaFramework_WeChat

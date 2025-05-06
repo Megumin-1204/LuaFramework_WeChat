@@ -1,15 +1,26 @@
 -- Assets/Lua/UI/BasePanel.lua
--- 基础面板类，所有 Lua 面板继承自它
+local Class = Class        -- 全局已注册
+local UILayer = require("UI.UILayer")
+
 local BasePanel = Class("BasePanel")
 
 function BasePanel:ctor(go)
+    -- 1. 挂载层级
+    --    面板类上可声明： MyPanel.Layer = "Popup"
+    local layerKey = self.class and self.class.Layer or nil
+    UILayer.SetPanelLayer(go, layerKey)
+
+    -- 2. 基础初始化
     self.gameObject = go
     self.transform  = go.transform
-    -- 缓存通用组件
+
+    -- 3. 缓存通用组件
     self:CacheComponents()
-    -- 调用子类 Init（如果有）
+
+    -- 4. 子类 Init
     if self.Init then self:Init() end
-    -- 面板显示后钩子
+
+    -- 5. 面板显示后钩子
     if self.OnShow then self:OnShow() end
 end
 

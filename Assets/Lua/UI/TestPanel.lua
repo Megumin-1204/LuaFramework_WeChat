@@ -2,6 +2,7 @@
 -- 一个示例面板，继承自 BasePanel
 local BasePanel = require("UI.BasePanel")
 local TestPanel = Class("TestPanel", BasePanel)
+TestPanel.Layer = "Popup"
 
 function TestPanel:Init()
     -- 缓存特有组件

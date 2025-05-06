@@ -1,113 +1,65 @@
--- UI/UIMgr.lua
+-- Assets/Lua/UI/UIMgr.lua
 local UIMgr = {}
-
--- 调试模式开关
 local DEBUG_MODE = true
 
--- 私有方法：记录调试日志
 local function log(msg)
-    if DEBUG_MODE then
-        print("[UIMgr DEBUG] " .. tostring(msg))
-    end
+    if DEBUG_MODE then print("[UIMgr] " .. tostring(msg)) end
 end
 
--- 私有方法：安全获取C# UIManager实例
 local function getUIManager()
-    if not CS then
-        log("CS命名空间不存在")
+    if not CS or not CS.UIManager then
+        log("无法获取 CS.UIManager")
         return nil
     end
-
-    -- 检查CS.UIManager类型
-    log(string.format("CS.UIManager类型：%s", type(CS.UIManager)))
-
-    if not CS.UIManager then
-        log("CS.UIManager类未找到，请检查：")
-        log("1. XLua是否生成对应绑定代码")
-        log("2. 类名是否拼写正确")
-        return nil
-    end
-
-    -- 检查Instance有效性
-    log(string.format("尝试获取UIManager.Instance，当前状态：%s", tostring(CS.UIManager.Instance)))
-
-    local instance = CS.UIManager.Instance
-    if not instance then
-        log("UIManager实例尚未初始化，可能原因：")
-        log("- C#单例未在Awake初始化")
-        log("- 组件未正确挂载")
-    else
-        log(string.format("成功获取UIManager实例 (类型：%s)", type(instance)))
-    end
-
-    return instance
+    return CS.UIManager.Instance
 end
 
--- 显示面板（强化版）
+-- params 现在只支持 { onLoaded=fn, onFailed=fn }
 function UIMgr.ShowPanel(panelName, params)
-    -- 参数验证
-    if type(panelName) ~= "string" or string.len(panelName) == 0 then
-        error("无效的panelName参数，必须为非空字符串")
-    end
-
+    assert(type(panelName) == "string" and #panelName > 0, "panelName 必须是非空字符串")
+    if type(params) == "function" then params = { onLoaded = params } end
     params = params or {}
-    -- 支持两种调用模式：
-    -- 1. UIMgr.ShowPanel(name, callbackFunction)
-    -- 2. UIMgr.ShowPanel(name, { onLoaded = fn1, onFailed = fn2 })
-    if type(params) == "function" then
-        params = { onLoaded = params }
-    else
-        params = params or {}
-    end
-    
-    local json = require("Third.json")
-    -- 日志输出
-    log(string.format("尝试加载面板: %s | 参数: %s", panelName, json.encode(params)))
 
-    -- 获取C#管理器实例
-    local csUIMgr = getUIManager()
-    if not csUIMgr then
-        error("UI系统尚未初始化完成，请检查UIManager是否已挂载")
-    end
+    log("加载面板: " .. panelName)
 
-    -- 定义Lua回调（带资源清理机制）
-    local callback = function(go)
+    local mgr = getUIManager()
+    assert(mgr, "UIManager 未初始化")
+
+    local function callback(go)
         if not go or go:Equals(nil) then
-            log(string.format("面板加载失败: %s", panelName))
-                if type(params.onFailed) == "function" then
-                    pcall(params.onFailed, "资源加载失败")
-                end
+            log("面板加载失败: " .. panelName)
+            if type(params.onFailed) == "function" then pcall(params.onFailed, "加载失败") end
             return
         end
 
-        log(string.format("面板加载成功: %s (实例ID: %s)", panelName, go:GetInstanceID()))
-
-        local ok, res = pcall(require, "UI."..panelName)
+        -- 1. 先 require 出面板类
+        local ok, panelClass = pcall(require, "UI." .. panelName)
         if not ok then
-            log(string.format("require UI.%s 失败，错误：%s", panelName, tostring(res)))
+            log("找不到 Lua 面板类: UI." .. panelName .. " 错误: " .. tostring(panelClass))
             CS.UnityEngine.Object.Destroy(go)
             return
         end
-        local panelClass = res
 
+        -- 2. 读取面板类的 Layer 字段，默认 Common
+        local UILayer = require("UI.UILayer")
+        local layerKey = panelClass.Layer or "Common"
+        UILayer.SetPanelLayer(go, layerKey)
 
-        -- 初始化面板实例
+        -- 3. 实例化面板
         local panel = panelClass.New(go)
+
+        -- 4. 回调
         if type(params.onLoaded) == "function" then
             pcall(params.onLoaded, panel)
         end
     end
-    
-    csUIMgr:ShowPanel(panelName, callback)
+
+    mgr:ShowPanel(panelName, callback)
 end
 
--- 关闭面板
 function UIMgr.ClosePanel(panelName)
-    local csUIMgr = getUIManager()
-    if csUIMgr then
-        log(string.format("关闭面板: %s", panelName))
-        csUIMgr:ClosePanel(panelName)
-    end
+    local mgr = getUIManager()
+    if mgr then mgr:ClosePanel(panelName) end
 end
 
 return UIMgr

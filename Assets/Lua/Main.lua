@@ -2,10 +2,6 @@
 --local dbg = require('emmy_core')
 --dbg.tcpConnect('localhost', 9966)
 
-print("===== xLua环境验证 =====")
-print("xlua类型:", type(xlua))
-print("cs函数类型:", type(xlua.cs))
-
 -- Main.lua
 local Class = require("Core.Class")
 print("======= System Boot =======")
