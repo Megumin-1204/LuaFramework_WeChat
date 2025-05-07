@@ -164,16 +164,37 @@ public class GameRoot : MonoBehaviour
     private void ShutdownFramework()
     {
         Log("[CORE] 正在关闭框架...");
-        
+    
+        // 一：清理 UI 上所有 Lua 回调
+        try
+        {
+            var uiMgr = UIManager.Instance;
+            uiMgr.ClearAllPanels();
+            Log("[CORE] UI面板已清理");
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("清理 UI 面板时出错: " + e.Message);
+        }
+
+        // 二：再 Dispose LuaEnv
         if (_luaEnv != null)
         {
-            _luaEnv.Dispose();
+            try
+            {
+                _luaEnv.Dispose();
+                Log("[LUA] 虚拟机已释放");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("LuaEnv.Dispose 时出错（忽略）: " + e.Message);
+            }
             _luaEnv = null;
-            Log("[LUA] 虚拟机已释放");
         }
-        
-        // 其他资源释放操作...
+    
+        // 其他资源释放...
     }
+
     #endregion
 
     #region 调试工具

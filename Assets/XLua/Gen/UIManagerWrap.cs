@@ -21,12 +21,13 @@ namespace XLua.CSObjectWrap
         {
 			ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
 			System.Type type = typeof(UIManager);
-			Utils.BeginObjectRegister(type, L, translator, 0, 4, 0, 0);
+			Utils.BeginObjectRegister(type, L, translator, 0, 5, 0, 0);
 			
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "InitializeUIRoot", _m_InitializeUIRoot);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "InitializeLayers", _m_InitializeLayers);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "ShowPanel", _m_ShowPanel);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "ClosePanel", _m_ClosePanel);
+			Utils.RegisterFunc(L, Utils.METHOD_IDX, "ClearAllPanels", _m_ClearAllPanels);
 			
 			
 			
@@ -175,6 +176,33 @@ namespace XLua.CSObjectWrap
                     string _panelName = LuaAPI.lua_tostring(L, 2);
                     
                     gen_to_be_invoked.ClosePanel( _panelName );
+                    
+                    
+                    
+                    return 0;
+                }
+                
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _m_ClearAllPanels(RealStatePtr L)
+        {
+		    try {
+            
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+            
+            
+                UIManager gen_to_be_invoked = (UIManager)translator.FastGetCSObj(L, 1);
+            
+            
+                
+                {
+                    
+                    gen_to_be_invoked.ClearAllPanels(  );
                     
                     
                     

@@ -75,8 +75,8 @@
     <Compile Include="Assets\XLua\Tutorial\CSharpCallLua\CSCallLua.cs" />
     <Compile Include="Assets\XLua\Src\CopyByValue.cs" />
     <Compile Include="Assets\XLua\Gen\XLuaTest_PeddingWrap.cs" />
-    <Compile Include="Assets\XLua\Gen\UnityEngine_UI_ButtonWrap.cs" />
     <Compile Include="Assets\XLua\Gen\UnityEngine_BoundsWrap.cs" />
+    <Compile Include="Assets\XLua\Gen\UnityEngine_UI_ButtonWrap.cs" />
     <Compile Include="Assets\XLua\Examples\07_AsyncTest\MessageBox.cs" />
     <Compile Include="Assets\Scripts\Manager\WeChatManager.cs" />
     <Compile Include="Assets\XLua\Src\LuaDLL.cs" />

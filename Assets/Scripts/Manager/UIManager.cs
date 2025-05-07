@@ -173,4 +173,16 @@ public class UIManager : MonoBehaviour
             uiDict.Remove(panelName);
         }
     }
+    
+    public void ClearAllPanels()
+    {
+        // 销毁所有面板实例
+        foreach (var kv in uiDict)
+        {
+            if (kv.Value != null)
+                Destroy(kv.Value);
+        }
+        uiDict.Clear();
+    }
+
 }

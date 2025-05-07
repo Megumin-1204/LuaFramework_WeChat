@@ -1,34 +1,50 @@
 -- Assets/Lua/UI/TestPanel.lua
--- 一个示例面板，继承自 BasePanel
 local BasePanel = require("UI.BasePanel")
 local TestPanel = Class("TestPanel", BasePanel)
+
+-- 默认层级
 TestPanel.Layer = "Popup"
 
+-- 一次性初始化（只调用一次）
 function TestPanel:Init()
+    -- 挂层级（也可在 UIMgr 里做）
+    self:SetLayer(self.class.Layer)
+
     -- 缓存特有组件
-    self.BtnTest  = self.transform:Find("BtnTest"):GetComponent(typeof(CS.UnityEngine.UI.Button))
-    self.TextTitle = self.transform:Find("TextTitle"):GetComponent(typeof(CS.UnityEngine.UI.Text))
+    self.BtnTest    = self:Get("BtnTest",    typeof(CS.UnityEngine.UI.Button))
+    self.TextTitle  = self:Get("TextTitle",  typeof(CS.UnityEngine.UI.Text))
+
     -- 初始化显示
-    self.TextTitle.text = "这是 TestPanel"
+    self.TextTitle.text = "欢迎使用测试面板"
 end
 
--- 面板显示后钩子
+-- 每次显示时调用
 function TestPanel:OnShow()
-    print("[TestPanel] 已显示，实例ID:", self.gameObject:GetInstanceID())
-    -- 例如自动绑定关闭按钮
-    if self.components.BtnClose then
-        self.components.BtnClose.onClick:AddListener(function() self:Destroy() end)
+    print("[TestPanel] OnShow 开始执行", self.BtnTest)
+    print("[TestPanel] OnShow, 实例ID=", self.gameObject:GetInstanceID())
+
+    -- 确认 BtnTest 拿到的是什么
+    if self.BtnTest then
+        print("[TestPanel] BtnTest 组件存在，name=", self.BtnTest.gameObject.name)
+        print("[TestPanel] BtnTest targetGraphic=", tostring(self.BtnTest.targetGraphic))
+        print("[TestPanel] BtnTest.interactable=", tostring(self.BtnTest.interactable))
+
+        -- 清空旧 listener
+        self.BtnTest.onClick:RemoveAllListeners()
+        -- 重新绑定
+        self.BtnTest.onClick:AddListener(function()
+            print("[TestPanel] 按钮被点击（Unity 原生 onClick）")
+        end)
+    else
+        print("[TestPanel] BtnTest 组件没有找到！")
     end
 end
 
--- 对外注册按钮回调
-function TestPanel:SetClickCallback(cb)
-    if self.BtnTest then
-        CS.XLuaHelper.AddClick(self.BtnTest.gameObject, function()
-            print("[TestPanel] 按钮被点击")
-            if cb then pcall(cb) end
-        end)
-    end
+
+-- 每次隐藏前调用
+function TestPanel:OnHide()
+    print("[TestPanel] OnHide")
+    -- 所有 listeners 已由基类清理
 end
 
 return TestPanel
