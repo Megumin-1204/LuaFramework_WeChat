@@ -1,16 +1,18 @@
 -- Assets/Lua/UI/BasePanel.lua
-local Class = Class        -- 全局已注册
+-- 注意：这里假定全局已经有 Class() 函数
 local UILayer = require("UI.UILayer")
 
 local BasePanel = Class("BasePanel")
 
 function BasePanel:ctor(go)
-    -- 1. 挂载层级
-    --    面板类上可声明： MyPanel.Layer = "Popup"
+    -- *** 调试用，确认 ctor 被调用 ***
+    print("[BasePanel] ctor, go name:", go.name)
+
+    -- 1. 挂载层级（读取子类的 .Layer 字段）
     local layerKey = self.class and self.class.Layer or nil
     UILayer.SetPanelLayer(go, layerKey)
 
-    -- 2. 基础初始化
+    -- 2. 保存引用
     self.gameObject = go
     self.transform  = go.transform
 
@@ -18,13 +20,17 @@ function BasePanel:ctor(go)
     self:CacheComponents()
 
     -- 4. 子类 Init
-    if self.Init then self:Init() end
+    if self.Init then
+        self:Init()
+    end
 
-    -- 5. 面板显示后钩子
-    if self.OnShow then self:OnShow() end
+    -- 5. 子类 OnShow
+    if self.OnShow then
+        print("[BasePanel] 触发 OnShow")
+        self:OnShow()
+    end
 end
 
--- 自动缓存常用组件，可根据项目需求扩展
 function BasePanel:CacheComponents()
     self.components = {}
     local map = {
@@ -39,10 +45,10 @@ function BasePanel:CacheComponents()
     end
 end
 
--- 虚方法，子类实现
-function BasePanel:Init()    end
-function BasePanel:OnShow()  end
-function BasePanel:OnHide()  end
+-- 虚方法
+function BasePanel:Init() end
+function BasePanel:OnShow() end
+function BasePanel:OnHide() end
 
 function BasePanel:Destroy()
     if self.gameObject then
