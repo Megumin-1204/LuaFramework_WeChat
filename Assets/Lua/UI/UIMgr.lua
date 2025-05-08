@@ -40,10 +40,11 @@ function UIMgr.ShowPanel(panelName, params)
         log("实例化面板:", panelName)
         local panel = panelClass.New(panelClass, go)
 
-        -- 4. 手动触发 OnShow（避免放在 ctor 里被覆盖或漏调）
-        if panel.OnShow then
-            log("触发 OnShow:", panelName)
-            pcall(function() panel:OnShow() end)
+        -- 4. 手动触发 OnEnable（避免放在 ctor 里被覆盖或漏调）
+        if panel.OnEnable then
+            log("触发 OnEnable:", panelName)
+            -- 把 params 传给面板的 OnEnable
+            pcall(function() panel:OnEnable(params) end)
         end
 
         -- 5. 最后 onLoaded 回调
