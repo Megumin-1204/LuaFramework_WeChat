@@ -131,7 +131,7 @@ public class GameRoot : MonoBehaviour
     {
         try
         {
-            _luaEnv.DoString("require 'Main'");
+            _luaEnv.DoString("require 'Entry.Main'");
         }
         catch (Exception ex)
         {

@@ -4,7 +4,7 @@ Assets/
 │   │   ├── `Class.lua`            <!-- 基础类定义与继承系统 -->  
 │   │   ├── `EventManager.lua`     <!-- 自定义事件总线 -->  
 │   │   └── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
-│   ├── **Third/**                 <!-- 第三方 Lua 库 -->  
+│   ├── **Third/**                 <!-- 第三方 Lua 库 -->  Lua入口执行失败
 │   │   └── `Json.lua`             <!-- JSON 编解码 -->  
 │   └── **UI/**                    <!-- 各面板的 Lua 脚本 -->  
 │       ├── `BasePanel.lua`        <!-- 面板基类 -->  
