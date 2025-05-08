@@ -3,23 +3,16 @@ Assets/
 │   ├── **Core/**                  <!-- 框架核心模块 -->  
 │   │   ├── `Class.lua`            <!-- 基础类定义与继承系统 -->  
 │   │   ├── `EventManager.lua`     <!-- 自定义事件总线 -->  
-│   │   ├── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->  
-│   │   └── **UI/**                 <!-- Lua 层 UI 管理 -->  
-│   │       ├── `UILayer.lua`      <!-- 定义 UI 分层（底/中/顶层） -->  
-│   │       ├── `UIPool.lua`       <!-- UI 对象池管理 -->  
-│   │       └── `UIStack.lua`      <!-- 界面栈管理（入栈/出栈/回退） -->  
-│   ├── **Game/**                  <!-- 游戏业务模块 -->  
-│   │   └── **Modules/**           <!-- 按功能拆分的子模块 -->  
-│   │       └── **Login/**         <!-- 登录模块示例 -->  
-│   │           ├── `LoginController.lua` <!-- 登录流程控制 -->  
-│   │           ├── `LoginModel.lua`      <!-- 登录数据管理 -->  
-│   │           └── `LoginView.lua`       <!-- 登录界面渲染与交互 -->  
+│   │   └── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
 │   ├── **Third/**                 <!-- 第三方 Lua 库 -->  
 │   │   └── `Json.lua`             <!-- JSON 编解码 -->  
 │   └── **UI/**                    <!-- 各面板的 Lua 脚本 -->  
 │       ├── `BasePanel.lua`        <!-- 面板基类 -->  
 │       ├── `UIMgr.lua`            <!-- Lua 封装的 UI 管理接口 -->  
-│       └── `TestPanel.lua`        <!-- 示例面板逻辑 -->  
+│       ├── `TestPanel.lua`        <!-- 示例面板逻辑 -->  
+│       ├── `UILayer.lua`      <!-- 定义 UI 分层（底/中/顶层） -->  
+│       ├── `UIPool.lua`       <!-- UI 对象池管理 -->  
+│       └── `UIStack.lua`      <!-- 界面栈管理（入栈/出栈/回退） -->  
 │  
 ├── **Scripts/**                   <!-- Unity C# 脚本 -->  
 │   ├── `GameRoot.cs`              <!-- 游戏入口，Lua 环境初始化 -->  
