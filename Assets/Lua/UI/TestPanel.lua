@@ -4,8 +4,9 @@ local TestPanel = Class("TestPanel", BasePanel)
 TestPanel.Layer = "Popup"
 
 function TestPanel:OnCreate()
-    local txt = self:GetComponent("TextTitle", typeof(CS.UnityEngine.UI.Text))
-    txt.text = "示例面板"
+    -- 不再需要显式 typeof，自动获取 Text 组件
+    local txt = self:GetComponent("TextTitle")
+    if txt then txt.text = "示例面板" end
 end
 
 -- 由 BasePanel:OnEnable 调用

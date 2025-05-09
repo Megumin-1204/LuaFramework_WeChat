@@ -79,57 +79,82 @@ function BasePanel:GetObject(name)
     return self._cache[name]
 end
 
+--- 可选 compType：
+--- 如果传了就按类型找，否则自动在常用 UI 组件里扫一遍，找到就返回
 function BasePanel:GetComponent(name, compType)
-    local key = name.."#"..tostring(compType)
+    local key = compType and (name .. "#" .. tostring(compType)) or name
     if not self._cache[key] then
         local go = self:GetObject(name)
         if go then
-            self._cache[key] = go:GetComponent(compType)
+            if compType then
+                self._cache[key] = go:GetComponent(compType)
+            else
+                -- 常见的 UI 组件列表，按需增删
+                local tryTypes = {
+                    CS.UnityEngine.UI.Button,
+                    CS.UnityEngine.UI.Toggle,
+                    CS.UnityEngine.UI.Slider,
+                    CS.UnityEngine.UI.InputField,
+                    CS.UnityEngine.UI.Text,
+                    CS.UnityEngine.UI.Image,
+                }
+                for _, t in ipairs(tryTypes) do
+                    local c = go:GetComponent(typeof(t))
+                    if c then
+                        self._cache[key] = c
+                        break
+                    end
+                end
+            end
         end
     end
     return self._cache[key]
 end
 
 function BasePanel:HasComponent(name, compType)
-    return self:GetComponent(name, compType) ~= nil
+    if compType then
+        return self:GetComponent(name, compType) ~= nil
+    else
+        return self:GetComponent(name) ~= nil
+    end
 end
 
 -- ========== 通用事件绑定 ==========
 
 function BasePanel:AddListener(name, handler)
     local go = self:GetObject(name)
-    assert(go, "AddListener 找不到对象: "..name)
+    assert(go, "AddListener 找不到对象: " .. name)
 
     -- Button
     local btn = go:GetComponent(typeof(CS.UnityEngine.UI.Button))
     if btn then
         btn.onClick:AddListener(handler)
-        table.insert(self._listeners, {comp=btn, method="onClick", fn=handler})
+        table.insert(self._listeners, {comp = btn, method = "onClick", fn = handler})
         return
     end
     -- Toggle
     local tgl = go:GetComponent(typeof(CS.UnityEngine.UI.Toggle))
     if tgl then
         tgl.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp=tgl, method="onValueChanged", fn=handler})
+        table.insert(self._listeners, {comp = tgl, method = "onValueChanged", fn = handler})
         return
     end
     -- Slider
     local sld = go:GetComponent(typeof(CS.UnityEngine.UI.Slider))
     if sld then
         sld.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp=sld, method="onValueChanged", fn=handler})
+        table.insert(self._listeners, {comp = sld, method = "onValueChanged", fn = handler})
         return
     end
     -- InputField
     local input = go:GetComponent(typeof(CS.UnityEngine.UI.InputField))
     if input then
         input.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp=input, method="onValueChanged", fn=handler})
+        table.insert(self._listeners, {comp = input, method = "onValueChanged", fn = handler})
         return
     end
 
-    error("AddListener 不支持的控件类型: "..name)
+    error("AddListener 不支持的控件类型: " .. name)
 end
 
 function BasePanel:ClearListeners()

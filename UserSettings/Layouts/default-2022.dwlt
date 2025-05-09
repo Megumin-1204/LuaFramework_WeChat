@@ -121,8 +121,8 @@ MonoBehaviour:
     y: 0
     width: 370
     height: 661
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 13}
   m_Panes:
   - {fileID: 13}
@@ -338,8 +338,8 @@ MonoBehaviour:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 485b0000
-    m_LastClickedID: 23368
+    m_SelectedIDs: 4a5b0000
+    m_LastClickedID: 23370
     m_ExpandedIDs: 00000000fc5a0000fe5a0000005b0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
