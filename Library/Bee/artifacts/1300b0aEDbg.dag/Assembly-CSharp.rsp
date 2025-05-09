@@ -357,6 +357,7 @@
 -analyzer:"D:/Unity Editor/2022.3.20f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Scenes/Test.cs"
 "Assets/Scripts/GameRoot.cs"
+"Assets/Scripts/Manager/TimeManager.cs"
 "Assets/Scripts/Manager/UIManager.cs"
 "Assets/Scripts/Manager/UIMaskManager.cs"
 "Assets/Scripts/Manager/WeChatManager.cs"

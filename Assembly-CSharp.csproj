@@ -89,6 +89,7 @@
     <Compile Include="Assets\XLua\Gen\WeChatManagerWrap.cs" />
     <Compile Include="Assets\XLua\Gen\PackUnpack.cs" />
     <Compile Include="Assets\XLua\Gen\UnityEngine_CanvasWrap.cs" />
+    <Compile Include="Assets\Scripts\Manager\TimeManager.cs" />
     <Compile Include="Assets\XLua\Examples\11_RawObject\RawObjectTest.cs" />
     <Compile Include="Assets\XLua\Gen\UIManagerWrap.cs" />
     <Compile Include="Assets\XLua\Src\SignatureLoader.cs" />
