@@ -72,6 +72,8 @@ public class GameRoot : MonoBehaviour
         AddManager<WeChatManager>();
         // UI 遮罩/交互拦截
         AddManager<UIMaskManager>();
+        // 资源管理器
+        // AddManager<ResourceManager>();
         // ……按照需要继续挂载其它管理器，如 NetworkManager、AudioManager 等
 
         Log("[CORE] C# 管理器初始化完成");

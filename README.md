@@ -3,7 +3,8 @@ Assets/
 │   ├── **Core/**                  <!-- 框架核心模块 -->  
 │   │   ├── `Class.lua`            <!-- 基础类定义与继承系统 -->  
 │   │   ├── `EventManager.lua`     <!-- 自定义事件总线 -->  
-│   │   └── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
+│   │   ├── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
+│   │   └── `TimerManager.lua`    
 │   ├── **Entry/**                 
 │   │   └── `Main.lua`     
 │   ├── **Game/**                 
@@ -30,6 +31,7 @@ Assets/
 │   └── **Manager/**               <!-- 各类管理器 -->  
 │       ├── `UIManager.cs`         <!-- Resources 异步加载 & 面板管理 -->  
 │       ├── `WeChatManager.cs`     <!-- 微信平台集成 -->  
+│       ├── `TimeManager.cs`     
 │       └── `UIMaskManager.cs`     <!-- UI 遮罩层管理 -->  
 │  
 ├── **Resources/**                 <!-- Unity Resources（运行时加载） -->  

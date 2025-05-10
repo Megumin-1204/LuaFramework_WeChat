@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using XLua;
+using System;
 
 public static class XLuaGenConfig
 {
@@ -18,5 +19,9 @@ public static class XLuaGenConfig
         typeof(System.Action),
         typeof(System.Func<>),
         typeof(GameRoot),
+        typeof(ResourceManager),
+        typeof(UnityEngine.AssetBundleManifest),
+        typeof(Action<bool>),
+        typeof(Action<UnityEngine.Object>),
     };
 }
