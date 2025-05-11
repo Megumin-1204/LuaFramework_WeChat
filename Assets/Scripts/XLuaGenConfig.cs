@@ -23,5 +23,6 @@ public static class XLuaGenConfig
         typeof(UnityEngine.AssetBundleManifest),
         typeof(Action<bool>),
         typeof(Action<UnityEngine.Object>),
+        typeof(UIMaskManager),
     };
 }

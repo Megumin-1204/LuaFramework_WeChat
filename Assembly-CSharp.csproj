@@ -171,6 +171,7 @@
     <None Include="Assets\XLua\Examples\14_HotfixAsyncAwait\Resources\AsyncMethod1.lua.txt" />
     <None Include="Assets\XLua\Examples\03_UIEvent\ButtonInteraction.lua.txt" />
     <None Include="Assets\XLua\Examples\14_HotfixAsyncAwait\Resources\AsyncMethod4.lua.txt" />
+    <None Include="Assets\StreamingAssets\AssetBundles\version_manifest.json" />
     <None Include="Assets\XLua\Examples\02_U3DScripting\LuaTestScript.lua.txt" />
     <None Include="Assets\XLua\Examples\07_AsyncTest\Resources\message_box.lua.txt" />
     <None Include="Assets\XLua\Examples\14_HotfixAsyncAwait\Resources\AsyncMethod2.lua.txt" />

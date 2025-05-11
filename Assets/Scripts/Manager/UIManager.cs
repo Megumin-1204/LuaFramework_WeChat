@@ -1,8 +1,9 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using XLua;
-using System.Collections;
-using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -20,9 +21,7 @@ public class UIManager : MonoBehaviour
                         _instance = go.AddComponent<UIManager>();
                         DontDestroyOnLoad(go);
                     }
-                    // 第一次拿 Instance 时确保 _uiRoot 已建
                     _instance.InitializeUIRoot();
-                    // 第一次拿 Instance 时确保各层根节点已建
                     _instance.InitializeLayers();
                 }
             }
@@ -32,6 +31,7 @@ public class UIManager : MonoBehaviour
     
     private Transform _uiRoot;
     private Dictionary<string, GameObject> uiDict = new Dictionary<string, GameObject>();
+    private UIMaskManager _maskMgr;
 
     void Awake()
     {
@@ -41,15 +41,17 @@ public class UIManager : MonoBehaviour
             return;
         }
         _instance = this;
+        DontDestroyOnLoad(gameObject);
+
         InitializeUIRoot();
         InitializeLayers();
+        _maskMgr = GetComponent<UIMaskManager>();
     }
 
-    // =================================
+    // ================================
     // UIRoot & Layer 初始化
-    // =================================
+    // ================================
 
-    // 确保只执行一次
     public void InitializeUIRoot()
     {
         if (_uiRoot != null) return;
@@ -57,7 +59,7 @@ public class UIManager : MonoBehaviour
         if (existing != null)
         {
             _uiRoot = existing.transform;
-            Debug.Log("复用已有UIRoot");
+            Debug.Log("[UIManager] Reuse existing UIRoot");
         }
         else
         {
@@ -65,118 +67,137 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void CreateNewUIRoot()
+    private void CreateNewUIRoot()
     {
         var root = new GameObject("UIRoot");
         DontDestroyOnLoad(root);
         _uiRoot = root.transform;
 
-        // Canvas + Scaler + Raycaster
         var canvas = root.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
         var scaler = root.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.uiScaleMode      = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1024, 1920);
-        scaler.matchWidthOrHeight = 1f;
+        scaler.matchWidthOrHeight  = 1f;
 
         root.AddComponent<GraphicRaycaster>();
-
-        Debug.Log("UIRoot（竖屏1024×1920）创建成功");
+        Debug.Log("[UIManager] Created UIRoot (1024×1920)");
     }
 
-    // 定义层级名与 Order
     private readonly (string name, int order)[] _layers = new[]
     {
-        ("BackgroundLayer", 0),
+        ("BackgroundLayer",  0),
         ("CommonLayer",     10),
         ("PopupLayer",      20),
         ("TipsLayer",       30),
-        ("SystemLayer",     100)
+        ("SystemLayer",    100),
     };
 
-    // 创建各层根节点
     public void InitializeLayers()
     {
         if (_uiRoot == null) InitializeUIRoot();
 
         foreach (var (name, order) in _layers)
         {
-            // 如果已存在就跳过
-            var exist = _uiRoot.Find(name);
-            if (exist != null) continue;
+            if (_uiRoot.Find(name)) continue;
 
             var go = new GameObject(name);
             go.transform.SetParent(_uiRoot, false);
 
             var canvas = go.AddComponent<Canvas>();
             canvas.overrideSorting = true;
-            canvas.sortingOrder     = order;
+            canvas.sortingOrder    = order;
 
             go.AddComponent<GraphicRaycaster>();
         }
-        Debug.Log("UI 分层根节点初始化完成");
+        Debug.Log("[UIManager] UI layers initialized");
     }
 
-    // =================================
-    // 面板加载与管理
-    // =================================
+    // ================================
+    // 面板加载与管理（AssetBundle）
+    // ================================
 
-    public void ShowPanel(string panelName, LuaFunction callback)
+    /// <summary>
+    /// 异步显示一个面板。Lua 调用时传入 LuaFunction 回调。
+    /// </summary>
+    public void ShowPanel(string panelName, LuaFunction luaCallback)
     {
         if (string.IsNullOrEmpty(panelName))
         {
-            Debug.LogError("ShowPanel: 无效的面板名称");
+            Debug.LogError("[UIManager] ShowPanel: invalid panelName");
             return;
         }
-        StartCoroutine(LoadPanel(panelName, callback));
+        StartCoroutine(LoadPanelRoutine(panelName, luaCallback));
     }
 
-    private IEnumerator LoadPanel(string panelName, LuaFunction onLoaded)
+    private IEnumerator LoadPanelRoutine(string panelName, LuaFunction luaCallback)
     {
-        // 确保根与层级已建
+        // 1) 确保根 & 层级
         if (_uiRoot == null) InitializeUIRoot();
         InitializeLayers();
 
-        // 异步加载
-        var path    = $"UI/{panelName}";
-        var request = Resources.LoadAsync<GameObject>(path);
-        yield return request;
-
-        if (request.asset == null)
+        // 2) 异步加载 Bundle
+        var bundleName = $"ui_{panelName.ToLower()}";
+        bool bundleOk = false;
+        yield return StartCoroutine(
+            ResourceManager.Instance.LoadBundleAsync(bundleName, success => bundleOk = success)
+        );
+        if (!bundleOk)
         {
-            Debug.LogError($"[UIManager] 资源加载失败：{path}");
+            Debug.LogError($"[UIManager] LoadBundle failed: {bundleName}");
             yield break;
         }
 
-        var prefab = request.asset as GameObject;
-        var panel  = Instantiate(prefab);
+        // 3) 异步加载 Prefab
+        GameObject prefab = null;
+        yield return StartCoroutine(
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(
+                bundleName,
+                $"Assets/Resources/UI/{panelName}.prefab",
+                go => prefab = go
+           )
+        );
+        if (prefab == null)
+        {
+            Debug.LogError($"[UIManager] LoadAsset failed: {panelName}");
+            yield break;
+        }
 
-        // 默认挂 Common 层，也可以让 Lua 传入 targetLayer 决定
-        // 这里先挂到 CommonLayer，Lua 再可调整
-        var commonRoot = _uiRoot.Find("CommonLayer");
-        panel.transform.SetParent(commonRoot, false);
+        // 4) 实例化 & 挂到 UIRoot
+        var goInstance = Instantiate(prefab, _uiRoot);
+        goInstance.name = panelName;
 
-        uiDict[panelName] = panel;
+        // 5) 遮罩 & UI 栈 管理
+        _maskMgr?.Register(goInstance);
 
-        if (onLoaded != null)
-            onLoaded.Call(panel);
-        else
-            Debug.LogWarning($"[UIManager] 面板 {panelName} 无 onLoaded 回调");
+        // 6) 回调给 Lua
+        luaCallback?.Call(goInstance);
     }
 
+    /// <summary>
+    /// 关闭面板：销毁 GameObject、取消遮罩，再卸载对应的 Bundle。
+    /// </summary>
     public void ClosePanel(string panelName)
     {
+        if (string.IsNullOrEmpty(panelName)) return;
+
         if (uiDict.TryGetValue(panelName, out var panel))
         {
+            _maskMgr?.Unregister(panel);
             Destroy(panel);
             uiDict.Remove(panelName);
         }
+        // 卸载 Bundle
+        var bundleName = $"ui_{panelName.ToLower()}";
+        ResourceManager.Instance.UnloadBundle(bundleName);
     }
-    
+
+    /// <summary>
+    /// 清理所有面板
+    /// </summary>
     public void ClearAllPanels()
     {
-        // 销毁所有面板实例
         foreach (var kv in uiDict)
         {
             if (kv.Value != null)
@@ -184,5 +205,4 @@ public class UIManager : MonoBehaviour
         }
         uiDict.Clear();
     }
-
 }

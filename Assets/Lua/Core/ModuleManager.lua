@@ -53,7 +53,7 @@ function ModuleManager:BootCoreModules()
     self:RegisterModule("Timer", require("Core.TimerManager"))
     self:RegisterModule("UI",    require("UI.UIMgr"))
     self:RegisterModule("Net",   require("Core.NetManager"))
-    --self:RegisterModule("Res",   require("Core.ResourceManager"))
+    self:RegisterModule("Res",   require("Core.ResourceManager"))
     -- … 继续注册 Login、Main、Audio、Data 模块等
 
     -- 按顺序启动：先走全局逻辑，再进业务
@@ -61,7 +61,7 @@ function ModuleManager:BootCoreModules()
     self:StartModule("Timer")
     self:StartModule("UI")
     self:StartModule("Net")
-    --self:StartModule("Res")
+    self:StartModule("Res")
     -- … 最后启动 Login 流程
     self:StartModule("Login")
 end
