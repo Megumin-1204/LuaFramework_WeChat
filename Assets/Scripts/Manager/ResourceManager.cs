@@ -3,62 +3,116 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using XLua;
 
+[DisallowMultipleComponent]
+[LuaCallCSharp]  // 如果你需要在 Lua 直接访问 ResourceManager
 public class ResourceManager : MonoBehaviour
 {
-    public static ResourceManager Instance { get; private set; }
+    // —— 单例 —— 
+    private static ResourceManager _instance;
+    public static ResourceManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                // 尝试场景查找
+                _instance = FindObjectOfType<ResourceManager>();
+                if (_instance == null)
+                {
+                    // 自动创建
+                    var go = new GameObject("ResourceManager");
+                    _instance = go.AddComponent<ResourceManager>();
+                    DontDestroyOnLoad(go);
+                    Debug.Log("[ResourceManager] 自动创建单例实例");
+                }
+            }
+            return _instance;
+        }
+    }
 
+    /// <summary>
+    /// 运行时是否使用 AssetBundle。编辑器下为 false，打包后为 true。
+    /// </summary>
+    public static bool UseAssetBundles { get; private set; }
+
+    // AssetBundle manifest & 缓存
     private AssetBundleManifest _manifest;
-    private readonly Dictionary<string, AssetBundle> _bundleCache = new Dictionary<string, AssetBundle>();
-    private readonly Dictionary<string, int> _refCounts = new Dictionary<string, int>();
+    private readonly Dictionary<string, AssetBundle> _bundles   = new Dictionary<string, AssetBundle>();
+    private readonly Dictionary<string, int>         _refCounts = new Dictionary<string, int>();
 
+    // 根目录
     private string BundleRoot => Path.Combine(Application.streamingAssetsPath, "AssetBundles");
-    private const string ManifestBundleName = "AssetBundles";
+    private const string ManifestName = "AssetBundles";
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        // 单例保护
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        _instance = this;
         DontDestroyOnLoad(gameObject);
 
-        try
+        // 编辑器模式下不走 AB，方便调试
+#if UNITY_EDITOR
+        UseAssetBundles = false;
+#else
+        UseAssetBundles = true;
+#endif
+
+        if (UseAssetBundles)
         {
-            LoadManifest();
+            try
+            {
+                var path = Path.Combine(BundleRoot, ManifestName);
+                var bundle = AssetBundle.LoadFromFile(path);
+                _manifest = bundle?.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                bundle?.Unload(false);
+                Debug.Log("[ResourceManager] Loaded AssetBundleManifest");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[ResourceManager] Failed to load manifest: {ex.Message}");
+                _manifest = null;
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Debug.LogWarning($"[ResourceManager] 加载 Manifest 失败，跳过依赖加载: {ex.Message}");
-            _manifest = null;
+            Debug.Log("[ResourceManager] 编辑器模式：UseAssetBundles = false");
         }
     }
 
-    private void LoadManifest()
-    {
-        var path = Path.Combine(BundleRoot, ManifestBundleName);
-        var bundle = AssetBundle.LoadFromFile(path);
-        if (bundle == null) throw new FileNotFoundException($"Manifest 文件不存在: {path}");
-        _manifest = bundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-        bundle.Unload(false);
-        Debug.Log("[ResourceManager] Manifest 加载完成");
-    }
-
+    [LuaCallCSharp]
     public IEnumerator LoadBundleAsync(string bundleName, Action<bool> onComplete)
     {
-        if (_bundleCache.ContainsKey(bundleName))
+        Debug.Log($"[ResourceManager] LoadBundleAsync 请求: {bundleName}");
+        if (!UseAssetBundles)
         {
-            _refCounts[bundleName]++;
             onComplete?.Invoke(true);
             yield break;
         }
 
+        if (_bundles.ContainsKey(bundleName))
+        {
+            _refCounts[bundleName]++;
+            Debug.Log($"[ResourceManager] Bundle 已缓存，引用计数++: {bundleName} = {_refCounts[bundleName]}");
+            onComplete?.Invoke(true);
+            yield break;
+        }
+
+        // 加载依赖
         if (_manifest != null)
         {
             foreach (var dep in _manifest.GetAllDependencies(bundleName))
                 yield return LoadBundleAsync(dep, null);
         }
 
-        var path = Path.Combine(BundleRoot, bundleName);
-        var req  = AssetBundle.LoadFromFileAsync(path);
+        var bundlePath = Path.Combine(BundleRoot, bundleName);
+        var req = AssetBundle.LoadFromFileAsync(bundlePath);
         yield return req;
 
         var bundle = req.assetBundle;
@@ -69,16 +123,23 @@ public class ResourceManager : MonoBehaviour
             yield break;
         }
 
-        _bundleCache[bundleName] = bundle;
-        _refCounts[bundleName]   = 1;
+        _bundles[bundleName]   = bundle;
+        _refCounts[bundleName] = 1;
+        Debug.Log($"[ResourceManager] Bundle 加载成功: {bundleName}");
         onComplete?.Invoke(true);
     }
 
+    [LuaCallCSharp]
     public bool LoadBundleSync(string bundleName)
     {
-        if (_bundleCache.ContainsKey(bundleName))
+        Debug.Log($"[ResourceManager] LoadBundleSync 请求: {bundleName}");
+        if (!UseAssetBundles)
+            return true;
+
+        if (_bundles.ContainsKey(bundleName))
         {
             _refCounts[bundleName]++;
+            Debug.Log($"[ResourceManager] Bundle 已缓存，引用计数++: {bundleName} = {_refCounts[bundleName]}");
             return true;
         }
 
@@ -88,117 +149,92 @@ public class ResourceManager : MonoBehaviour
                 LoadBundleSync(dep);
         }
 
-        var path   = Path.Combine(BundleRoot, bundleName);
-        var bundle = AssetBundle.LoadFromFile(path);
+        var bundlePath = Path.Combine(BundleRoot, bundleName);
+        var bundle = AssetBundle.LoadFromFile(bundlePath);
         if (bundle == null)
         {
             Debug.LogError($"[ResourceManager] LoadBundleSync 失败: {bundleName}");
             return false;
         }
 
-        _bundleCache[bundleName] = bundle;
-        _refCounts[bundleName]   = 1;
+        _bundles[bundleName]   = bundle;
+        _refCounts[bundleName] = 1;
+        Debug.Log($"[ResourceManager] Bundle 同步加载成功: {bundleName}");
         return true;
     }
 
-    // 非泛型 异步加载资源：先试完整路径，再试文件名
-    public IEnumerator LoadAssetAsync(string bundleName, string assetPath, Action<UnityEngine.Object> onLoaded)
+    [LuaCallCSharp]
+    public IEnumerator LoadAssetAsync(string bundleName, string assetName, Action<UnityEngine.Object> onLoaded)
     {
+        Debug.Log($"[ResourceManager] LoadAssetAsync 请求: {bundleName} -> {assetName}");
+        if (!UseAssetBundles)
+        {
+            var res = Resources.Load("UI/" + assetName);
+            Debug.Log($"[ResourceManager] 直接 Resources.Load: {assetName} => {res}");
+            onLoaded?.Invoke(res);
+            yield break;
+        }
+
+        // 确保 bundle 已加载
         yield return LoadBundleAsync(bundleName, null);
 
-        var bundle = _bundleCache[bundleName];
-
-        // 1) 尝试按完整路径加载
-        var req = bundle.LoadAssetAsync<UnityEngine.Object>(assetPath);
-        yield return req;
-        var asset = req.asset as UnityEngine.Object;
-
-        // 2) 如果失败，再尝试按文件名加载
-        if (asset == null)
+        if (_bundles.TryGetValue(bundleName, out var bundle))
         {
-            var name = Path.GetFileNameWithoutExtension(assetPath);
-            req = bundle.LoadAssetAsync<UnityEngine.Object>(name);
+            var req = bundle.LoadAssetAsync<UnityEngine.Object>(assetName);
             yield return req;
-            asset = req.asset as UnityEngine.Object;
+            if (req.asset != null)
+            {
+                Debug.Log($"[ResourceManager] 从 Bundle 加载资源成功: {assetName}");
+                onLoaded?.Invoke(req.asset);
+                yield break;
+            }
         }
 
-        if (asset == null)
-            Debug.LogError($"[ResourceManager] LoadAssetAsync 未找到资源: {assetPath}");
-
-        onLoaded?.Invoke(asset);
+        // 回退 Resources
+        Debug.LogWarning($"[ResourceManager] Bundle 中未找到 {assetName}，回退 Resources");
+        var fallback = Resources.Load("UI/" + assetName);
+        onLoaded?.Invoke(fallback);
     }
 
-    // 非泛型 同步加载
-    public UnityEngine.Object LoadAssetSync(string bundleName, string assetPath)
+    [LuaCallCSharp]
+    public UnityEngine.Object LoadAssetSync(string bundleName, string assetName)
     {
-        if (!LoadBundleSync(bundleName)) return null;
+        Debug.Log($"[ResourceManager] LoadAssetSync 请求: {bundleName} -> {assetName}");
+        if (!UseAssetBundles)
+            return Resources.Load("UI/" + assetName);
 
-        var bundle = _bundleCache[bundleName];
-        // 1) 先按路径
-        var asset = bundle.LoadAsset<UnityEngine.Object>(assetPath);
-        // 2) 再按文件名
-        if (asset == null)
+        if (!LoadBundleSync(bundleName))
+            return null;
+
+        if (_bundles.TryGetValue(bundleName, out var bundle))
         {
-            var name = Path.GetFileNameWithoutExtension(assetPath);
-            asset = bundle.LoadAsset<UnityEngine.Object>(name);
+            var asset = bundle.LoadAsset<UnityEngine.Object>(assetName);
+            if (asset != null)
+            {
+                Debug.Log($"[ResourceManager] 同步从 Bundle 加载成功: {assetName}");
+                return asset;
+            }
         }
 
-        if (asset == null)
-            Debug.LogError($"[ResourceManager] LoadAssetSync 未找到资源: {assetPath}");
-
-        return asset;
+        Debug.LogWarning($"[ResourceManager] 同步资源未在 Bundle 中找到 {assetName}，回退 Resources");
+        return Resources.Load("UI/" + assetName);
     }
 
-    // 泛型异步加载（可用，可留用）
-    public IEnumerator LoadAssetAsync<T>(string bundleName, string assetPath, Action<T> onLoaded) where T : UnityEngine.Object
-    {
-        yield return LoadBundleAsync(bundleName, null);
-
-        var bundle = _bundleCache[bundleName];
-        T asset = null;
-
-        // try path
-        var req = bundle.LoadAssetAsync<T>(assetPath);
-        yield return req;
-        asset = req.asset as T;
-
-        if (asset == null)
-        {
-            var name = Path.GetFileNameWithoutExtension(assetPath);
-            req = bundle.LoadAssetAsync<T>(name);
-            yield return req;
-            asset = req.asset as T;
-        }
-
-        if (asset == null)
-            Debug.LogError($"[ResourceManager] LoadAssetAsync<{typeof(T).Name}> 未找到: {assetPath}");
-
-        onLoaded?.Invoke(asset);
-    }
-
-    // 泛型同步加载
-    public T LoadAssetSync<T>(string bundleName, string assetPath) where T : UnityEngine.Object
-    {
-        if (!LoadBundleSync(bundleName)) return null;
-
-        var bundle = _bundleCache[bundleName];
-        T asset = bundle.LoadAsset<T>(assetPath);
-        if (asset == null)
-            asset = bundle.LoadAsset<T>(Path.GetFileNameWithoutExtension(assetPath));
-        if (asset == null)
-            Debug.LogError($"[ResourceManager] LoadAssetSync<{typeof(T).Name}> 未找到: {assetPath}");
-        return asset;
-    }
-
+    [LuaCallCSharp]
     public void UnloadBundle(string bundleName, bool unloadAllLoadedObjects = false)
     {
-        if (!_bundleCache.ContainsKey(bundleName)) return;
+        if (!UseAssetBundles) return;
+
+        if (!_bundles.ContainsKey(bundleName)) return;
+
         _refCounts[bundleName]--;
+        Debug.Log($"[ResourceManager] UnloadBundle 引用计数--: {bundleName} = {_refCounts[bundleName]}");
         if (_refCounts[bundleName] > 0) return;
 
-        _bundleCache[bundleName].Unload(unloadAllLoadedObjects);
-        _bundleCache.Remove(bundleName);
+        _bundles[bundleName].Unload(unloadAllLoadedObjects);
+        _bundles.Remove(bundleName);
         _refCounts.Remove(bundleName);
+        Debug.Log($"[ResourceManager] Bundle 已卸载: {bundleName}");
 
         if (_manifest != null)
         {
@@ -207,12 +243,16 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
+    [LuaCallCSharp]
     public void UnloadAll(bool unloadAllLoadedObjects = false)
     {
-        foreach (var kv in _bundleCache)
+        if (!UseAssetBundles) return;
+
+        foreach (var kv in _bundles)
             kv.Value.Unload(unloadAllLoadedObjects);
-        _bundleCache.Clear();
+
+        _bundles.Clear();
         _refCounts.Clear();
-        Debug.Log("[ResourceManager] 已卸载所有 AssetBundles");
+        Debug.Log("[ResourceManager] 已卸载所有 Bundle");
     }
 }

@@ -1,69 +1,82 @@
--- Core/ModuleManager.lua
--- 简化的商业级模块管理：支持注册、启动、停止
+-- Assets/Lua/Core/ModuleManager.lua
+-- 商业级模块管理：核心模块 vs 业务模块，带日志
 
 local ModuleManager = {
-    modules = {},   -- name -> module table
-    current = nil,  -- 当前活跃模块
+    coreModules  = {},   -- name -> mod
+    businessMods = {},   -- name -> mod
+    current      = nil,  -- 当前活跃的业务模块
 }
 
---- 注册模块
--- moduleTable 可实现 OnStart(params...), OnStop(), Enter(params...), Exit()
-function ModuleManager:RegisterModule(name, moduleTable)
-    assert(type(name) == "string",    "RegisterModule: name must be string")
-    assert(type(moduleTable) == "table","RegisterModule: module must be table")
-    self.modules[name] = moduleTable
-    print(string.format("[ModuleManager] Registered module '%s'", name))
+local function dbg(fmt, ...)
+    print(string.format("[ModuleManager] " .. fmt, ...))
 end
 
---- 启动（或切换到）模块
+--- 注册核心模块（只记录不执行）
+function ModuleManager:RegisterCore(name, mod)
+    assert(type(name)=="string" and type(mod)=="table", "RegisterCore 参数错误")
+    self.coreModules[name] = mod
+    dbg("Registered CORE module '%s'", name)
+end
+
+--- 启动所有核心模块，调用它们的 OnStart
+function ModuleManager:StartCore()
+    dbg("Starting CORE modules...")
+    for name, mod in pairs(self.coreModules) do
+        if mod.OnStart then
+            dbg("Core OnStart '%s'", name)
+            mod:OnStart()
+        else
+            dbg("Core module '%s' has no OnStart, skipping", name)
+        end
+    end
+    dbg("CORE modules started")
+end
+
+--- 注册业务模块（游戏流程用）
+function ModuleManager:RegisterBusiness(name, mod)
+    assert(type(name)=="string" and type(mod)=="table", "RegisterBusiness 参数错误")
+    self.businessMods[name] = mod
+    dbg("Registered BUSINESS module '%s'", name)
+end
+
+--- 切换到某个业务模块：先退出上一个，再启动新模块
 function ModuleManager:StartModule(name, ...)
-    local mod = self.modules[name]
-    if not mod then error("Module not found: " .. name) end
+    dbg("StartModule called for '%s'", name)
+    local mod = self.businessMods[name]
+    if not mod then error("Business module not found: " .. name) end
 
-    -- 如果已有当前模块，先退出
-    if self.current and self.current.Exit then
-        self.current:Exit()
-    end
-    if self.current and self.current.OnStop then
-        self.current:OnStop()
+    if self.current then
+        dbg("Stopping current module")
+        if self.current.Exit then self.current:Exit() end
+        if self.current.OnStop then self.current:OnStop() end
     end
 
-    -- 切换并启动
     self.current = mod
+    dbg("Calling OnStart of '%s'", name)
     if mod.OnStart then mod:OnStart(...) end
-    if mod.Enter   then mod:Enter(...)   end
 
-    print(string.format("[ModuleManager] Started module '%s'", name))
+    dbg("Calling Enter of '%s'", name)
+    if mod.Enter then
+        mod:Enter(...)
+    else
+        dbg("Module '%s' has no Enter()", name)
+    end
+
+    dbg("Module '%s' is now active", name)
 end
 
---- 停止（退出）指定模块
-function ModuleManager:StopModule(name)
-    local mod = self.modules[name]
-    if not mod then return end
-    if mod.Exit   then mod:Exit()   end
-    if mod.OnStop then mod:OnStop() end
-    if self.current == mod then self.current = nil end
-    print(string.format("[ModuleManager] Stopped module '%s'", name))
-end
-
---- 一次性批量注册并启动核心模块（可在 Entry.Main 调用）
-function ModuleManager:BootCoreModules()
-    -- 举例：请根据项目实际模块列表修改
-    self:RegisterModule("Event", require("Core.EventManager"))
-    self:RegisterModule("Timer", require("Core.TimerManager"))
-    self:RegisterModule("UI",    require("UI.UIMgr"))
-    self:RegisterModule("Net",   require("Core.NetManager"))
-    self:RegisterModule("Res",   require("Core.ResourceManager"))
-    -- … 继续注册 Login、Main、Audio、Data 模块等
-
-    -- 按顺序启动：先走全局逻辑，再进业务
-    self:StartModule("Event")
-    self:StartModule("Timer")
-    self:StartModule("UI")
-    self:StartModule("Net")
-    self:StartModule("Res")
-    -- … 最后启动 Login 流程
-    self:StartModule("Login")
+--- 停止当前业务模块
+function ModuleManager:StopCurrent()
+    if not self.current then return end
+    for nm, m in pairs(self.businessMods) do
+        if m == self.current then
+            dbg("Stopping BUSINESS module '%s'", nm)
+            if m.Exit   then m:Exit()   end
+            if m.OnStop then m:OnStop() end
+            self.current = nil
+            return
+        end
+    end
 end
 
 return ModuleManager

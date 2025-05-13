@@ -2,9 +2,9 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-public class TimerManager : MonoBehaviour
+public class TimeManager : MonoBehaviour
 {
-    public static TimerManager Instance { get; private set; }
+    public static TimeManager Instance { get; private set; }
 
     private class Timer
     {
@@ -44,7 +44,7 @@ public class TimerManager : MonoBehaviour
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[TimerManager] Callback error (id={t.id}): {ex}");
+                    Debug.LogError($"[TimeManager] Callback error (id={t.id}): {ex}");
                 }
 
                 if (t.repeat)

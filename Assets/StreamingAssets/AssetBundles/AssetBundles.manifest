@@ -1,7 +1,13 @@
 ManifestFileVersion: 0
-CRC: 1636233597
+CRC: 436292229
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
+      Name: ui_loadingpanel
+      Dependencies: {}
+    Info_1:
+      Name: ui_loginpanel
+      Dependencies: {}
+    Info_2:
       Name: ui_testpanel
       Dependencies: {}

@@ -1,9 +1,19 @@
 {
     "bundles": [
         {
+            "name": "ui_loadingpanel",
+            "md5": "78c53b502763edf4a2e8ee51f00e49e8",
+            "size": 11591
+        },
+        {
+            "name": "ui_loginpanel",
+            "md5": "a1be4ac6b6e3d4b9f9f7a76ab1ecbb50",
+            "size": 12699
+        },
+        {
             "name": "ui_testpanel",
-            "md5": "e0ad1f6ba3d0e14f914edbee5b7592da",
-            "size": 9725
+            "md5": "72789daaf61372067135da15feaba398",
+            "size": 9726
         }
     ]
 }

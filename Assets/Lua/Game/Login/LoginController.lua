@@ -1,33 +1,32 @@
-local Class       = Class
-local ModuleMgr   = require("Core.ModuleManager")
-local LoginModel  = require("Game.Login.LoginModel")
-local LoginView   = require("Game.Login.LoginView")
+-- Assets/Lua/Game/Login/LoginController.lua
+local Class        = require("Core.Class")
+local EventManager = require("Core.EventManager")
+local ModuleManager= require("Core.ModuleManager")
+local UIMgr        = require("UI.UIMgr")
 
-local LoginController = Class("LoginController")
+local LoginModule = Class("LoginModule")
 
-function LoginController:ctor()
-    self.model = LoginModel()
-    self.view  = LoginView()
-    self:BindEvents()
-end
-
-function LoginController:BindEvents()
-    -- View 通过 BasePanel:AddListener 提供了通用事件接口
-    self.view:AddListener("BtnLogin", function()
-        local u = self.view:GetInput("Username")
-        local p = self.view:GetInput("Password")
-        self:OnLoginClicked(u, p)
+function LoginModule:OnStart()
+    print("[LoginModule] OnStart 被调用")
+    EventManager.AddListener("LOGIN_SUCCESS", function()
+        ModuleManager:StartModule("Test")
     end)
 end
 
-function LoginController:OnLoginClicked(username, password)
-    self.model:Login(username, password, function(success)
-        if success then
-            ModuleMgr.Switch("Main")
-        else
-            print("登录失败")
-        end
+function LoginModule:Enter()
+    print("[LoginModule] ==> Enter() 被调用，下面尝试弹出 LoginPanel")
+    local ok, err = pcall(function()
+        UIMgr.ShowPanel("LoginPanel", {
+            onLoaded = function(panel) print("[LoginModule] onLoaded 回调", panel) end,
+            onFailed = function(e)     print("[LoginModule] onFailed 回调", e)   end,
+        })
     end)
+    print("[LoginModule] pcall 结果：", ok, err)
 end
 
-return LoginController
+function LoginModule:Exit()
+    print("[LoginModule] Exit() 被调用")
+    UIMgr.ClosePanel("LoginPanel")
+end
+
+return LoginModule

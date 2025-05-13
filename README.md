@@ -4,6 +4,7 @@ Assets/
 │   │   ├── `Class.lua`            <!-- 基础类定义与继承系统 -->  
 │   │   ├── `EventManager.lua`     <!-- 自定义事件总线 -->  
 │   │   ├── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
+│   │   ├── `ResourceManager.lua` 
 │   │   └── `TimerManager.lua`    
 │   ├── **Entry/**                 
 │   │   └── `Main.lua`     
@@ -28,14 +29,21 @@ Assets/
 │   ├── `GameRoot.cs`              <!-- 游戏入口，Lua 环境初始化 -->  
 │   ├── `XLuaGenConfig.cs`         <!-- XLua 绑定生成配置 -->  
 │   ├── **Base/**                  <!-- 公共基础脚本 -->  
+│   ├── **UI/**
+│   ├   └── `LoadingPanel.cs` 
 │   └── **Manager/**               <!-- 各类管理器 -->  
 │       ├── `UIManager.cs`         <!-- Resources 异步加载 & 面板管理 -->  
 │       ├── `WeChatManager.cs`     <!-- 微信平台集成 -->  
 │       ├── `TimeManager.cs`     
+│       ├── `ResourceManager.cs`     
+│       ├── `GameSceneManager.cs`     
 │       └── `UIMaskManager.cs`     <!-- UI 遮罩层管理 -->  
 │  
 ├── **Resources/**                 <!-- Unity Resources（运行时加载） -->  
-│   └── **UI/**                    <!-- 放 `Resources.LoadAsync("UI/…")` 的 Prefab、图集等 -->  
+│   └── **UI/**                    <!-- 放 `Resources.LoadAsync("UI/…")` 的 Prefab、图集等 -->
+│       ├── `TestPanel.prefab`
+│       ├── `LoadingPanel.prefab`
+│       └── `LoginPanel.prefab`
 │  
 ├── **Prefabs/**                   <!-- 非 Resources 的预制体，手动/打包加载 -->  
 │  

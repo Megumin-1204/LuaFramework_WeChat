@@ -387,7 +387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1132961024}
   - component: {fileID: 1132961025}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -421,6 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42061bc3be793674eadeb52c014a179e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugMode: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
