@@ -57,6 +57,7 @@
     <Compile Include="Assets\XLua\Examples\06_Coroutine\Coroutine_Runner.cs" />
     <Compile Include="Assets\XLua\Examples\10_SignatureLoader\SignatureLoaderTest.cs" />
     <Compile Include="Assets\Scripts\Manager\UIManager.cs" />
+    <Compile Include="Assets\Scripts\Manager\TimerManager.cs" />
     <Compile Include="Assets\XLua\Src\LuaEnv.cs" />
     <Compile Include="Assets\XLua\Examples\07_AsyncTest\AsyncTest.cs" />
     <Compile Include="Assets\XLua\Tutorial\CSharpCallLua\CSCallLua.cs" />
@@ -67,7 +68,6 @@
     <Compile Include="Assets\XLua\Src\LuaException.cs" />
     <Compile Include="Assets\XLua\Tutorial\LoadLuaScript\Loader\CustomLoader.cs" />
     <Compile Include="Assets\XLua\Examples\14_HotfixAsyncAwait\HotfixAsyncAwaitTest.cs" />
-    <Compile Include="Assets\Scripts\Manager\TimeManager.cs" />
     <Compile Include="Assets\XLua\Examples\11_RawObject\RawObjectTest.cs" />
     <Compile Include="Assets\XLua\Src\SignatureLoader.cs" />
     <Compile Include="Assets\XLua\Src\TypeExtensions.cs" />

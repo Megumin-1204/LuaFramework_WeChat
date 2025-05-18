@@ -359,7 +359,7 @@
 "Assets/Scripts/GameRoot.cs"
 "Assets/Scripts/Manager/GameSceneManager.cs"
 "Assets/Scripts/Manager/ResourceManager.cs"
-"Assets/Scripts/Manager/TimeManager.cs"
+"Assets/Scripts/Manager/TimerManager.cs"
 "Assets/Scripts/Manager/UIManager.cs"
 "Assets/Scripts/Manager/UIMaskManager.cs"
 "Assets/Scripts/Manager/WeChatManager.cs"

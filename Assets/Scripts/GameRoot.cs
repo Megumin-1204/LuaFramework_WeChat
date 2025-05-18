@@ -63,7 +63,7 @@ public class GameRoot : MonoBehaviour
         AddManager<UIManager>();        // UI 管理
         AddManager<UIMaskManager>();    // 遮罩管理
         AddManager<ResourceManager>();  // 资源管理
-        AddManager<TimeManager>();      // 定时器管理（你实际的类名）
+        AddManager<TimerManager>();      // 定时器管理（你实际的类名）
 
         Log("[INIT] C# 管理器初始化完成");
     }
