@@ -1,0 +1,22 @@
+syntax = "proto3";
+package game;
+
+// 登录请求
+message LoginRequest {
+  string uid   = 1;
+  string token = 2;
+}
+
+// 登录返回
+message LoginResponse {
+  int32  result = 1;
+  string msg    = 2;
+}
+
+// 心跳请求
+message HeartbeatRequest {}
+
+// 心跳返回
+message HeartbeatResponse {
+  int64 timestamp = 1;
+}
