@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 using XLua;
+using Game.Manager;    // ← 为了引用 NetworkManager
 
 [DisallowMultipleComponent]
 [LuaCallCSharp]  // 导出给 Lua
@@ -60,10 +61,17 @@ public class GameRoot : MonoBehaviour
     {
         Log("[INIT] 开始初始化 C# 管理器");
 
-        AddManager<UIManager>();        // UI 管理
-        AddManager<UIMaskManager>();    // 遮罩管理
-        AddManager<ResourceManager>();  // 资源管理
-        AddManager<TimerManager>();      // 定时器管理（你实际的类名）
+        // 网络模块：保证 NetworkManager.Instance 不为 null
+        AddManager<NetworkManager>();
+        // 资源管理
+        AddManager<ResourceManager>();
+        // UI 管理
+        AddManager<UIManager>();
+        // UI 遮罩
+        AddManager<UIMaskManager>();
+        // 定时器管理
+        AddManager<TimerManager>();
+        // （如有其它全局管理器，按需继续 AddManager<T>() ）
 
         Log("[INIT] C# 管理器初始化完成");
     }

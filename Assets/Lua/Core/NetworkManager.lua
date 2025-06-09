@@ -1,38 +1,55 @@
 -- Assets/Lua/Core/NetworkManager.lua
-local CSNet   = CS.Game.Manager.NetworkManager.Instance
-local protoc  = require "Third.protobuf.protoc".new()
-local serpent = require "Third.protobuf.serpent"
+
+-- 一定要拿到单例实例，而不是类型本身
+local NetCS   = CS.Game.Manager.NetworkManager.Instance
+local MsgID   = require("Core.MsgID")
 
 local NetworkManager = {}
 
---- 初始化：加载 all.pb 描述文件
-function NetworkManager.Init()
-    local path = CS.UnityEngine.Application.streamingAssetsPath .. "/Proto/all.pb"
-    local desc = CS.System.IO.File.ReadAllBytes(path)
-    assert(protoc:load(desc), "Failed to load Protobuf descriptor")
-    -- 可选：打印所有消息类型
-    -- print("Proto types:", serpent.block(protoc:msg_types()))
-end
-
---- 发送消息：Lua 表 → Protobuf 二进制 → C# 发送
--- @param msgID number 消息 ID，对应 .proto 中的 message 名称或枚举
--- @param tbl table  要发送的数据表
+--- 发送消息：Lua table → C# 对象 → C# Encode → C# 发送
+-- @param msgID number C# 枚举值
+-- @param tbl   table  要发送的数据
 function NetworkManager.Send(msgID, tbl)
-    local body = protoc:encode(msgID, tbl)
-    CSNet:SendRaw(msgID, body)
+    local msgObj
+    if msgID == MsgID.LoginRequest then
+        msgObj = CS.Game.Manager.LoginRequest()
+        msgObj.Username = tbl.Username
+        msgObj.Password = tbl.Password
+
+    elseif msgID == MsgID.HeartbeatRequest then
+        msgObj = CS.Game.Manager.HeartbeatRequest()
+
+    else
+        error("Unsupported Send msgID: " .. tostring(msgID))
+    end
+
+    -- 调用 C# 端静态 Encode 方法
+    local bytes = CS.Game.Manager.NetworkManager.Encode(msgObj)
+    -- 再调用实例方法 SendRaw
+    NetCS:SendRaw(msgID, bytes)
 end
 
---- 注册消息处理器：C# 收到 byte[] → 调用 handler(table)
--- @param msgID number 消息 ID
--- @param handler function 当收到该消息时的回调，接收一个 Lua table 参数
+--- 注册消息回调：C# 收到 byte[] → C# Decode → Lua table → handler
+-- @param msgID   number 消息 ID
+-- @param handler function 回调，接收一个纯 Lua table
 function NetworkManager.RegisterHandler(msgID, handler)
-    CSNet:RegisterHandler(msgID, function(body)
-        local ok, msg = pcall(protoc.decode, protoc, msgID, body)
-        if ok then
-            handler(msg)
+    NetCS:RegisterHandler(msgID, function(body)
+        -- 调用 C# 静态 Decode 方法
+        local respObj = CS.Game.Manager.NetworkManager.Decode(msgID, body)
+        -- 再把 C# 对象字段拷到 Lua table
+        local tbl = {}
+        if msgID == MsgID.LoginResponse then
+            tbl.Success = respObj.Success
+            tbl.Message = respObj.Message
+
+        elseif msgID == MsgID.HeartbeatResponse then
+            -- nothing to copy for heartbeat
+
         else
-            error("Protobuf decode error for msg " .. msgID .. ": " .. tostring(msg))
+            error("Unsupported RegisterHandler msgID: " .. tostring(msgID))
         end
+
+        handler(tbl)
     end)
 end
 

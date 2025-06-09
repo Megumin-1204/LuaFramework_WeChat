@@ -63,10 +63,12 @@
     <Compile Include="Assets\XLua\Examples\07_AsyncTest\AsyncTest.cs" />
     <Compile Include="Assets\XLua\Tutorial\CSharpCallLua\CSCallLua.cs" />
     <Compile Include="Assets\XLua\Src\CopyByValue.cs" />
+    <Compile Include="Assets\Scripts\Manager\MockNetwork.cs" />
     <Compile Include="Assets\XLua\Examples\07_AsyncTest\MessageBox.cs" />
     <Compile Include="Assets\Scripts\Manager\WeChatManager.cs" />
     <Compile Include="Assets\XLua\Src\LuaDLL.cs" />
     <Compile Include="Assets\XLua\Src\LuaException.cs" />
+    <Compile Include="Assets\Scripts\Manager\MsgID.cs" />
     <Compile Include="Assets\XLua\Tutorial\LoadLuaScript\Loader\CustomLoader.cs" />
     <Compile Include="Assets\XLua\Examples\14_HotfixAsyncAwait\HotfixAsyncAwaitTest.cs" />
     <Compile Include="Assets\XLua\Examples\11_RawObject\RawObjectTest.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Assets\XLua\Src\MethodWarpsCache.cs" />
     <Compile Include="Assets\XLua\Src\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Manager\NetworkManager.cs" />
+    <Compile Include="Assets\Scripts\Proto\HeartbeatResponse.cs" />
     <Compile Include="Assets\Scripts\GameRoot.cs" />
     <Compile Include="Assets\Scripts\UI\LoadingPanel.cs" />
     <Compile Include="Assets\XLua\Src\RawObject.cs" />
@@ -87,8 +90,11 @@
     <Compile Include="Assets\XLua\Examples\01_Helloworld\Helloworld.cs" />
     <Compile Include="Assets\XLua\Src\LuaFunction.cs" />
     <Compile Include="Assets\XLua\Src\LuaTable.cs" />
+    <Compile Include="Assets\Scripts\Proto\LoginResponse.cs" />
     <Compile Include="Assets\XLua\Src\Utils.cs" />
+    <Compile Include="Assets\Scripts\Proto\HeartbeatRequest.cs" />
     <Compile Include="Assets\XLua\Src\StaticLuaCallbacks.cs" />
+    <Compile Include="Assets\Scripts\Proto\TestProto.cs" />
     <Compile Include="Assets\XLua\Examples\09_GenericMethod\GenericMethodExample.cs" />
     <Compile Include="Assets\XLua\Examples\12_ReImplementInLua\ReImplementInLua.cs" />
     <Compile Include="Assets\XLua\Src\LuaBase.cs" />
@@ -97,6 +103,7 @@
     <Compile Include="Assets\XLua\Examples\02_U3DScripting\LuaBehaviour.cs" />
     <Compile Include="Assets\XLua\Examples\08_Hotfix\StatefullTest.cs" />
     <Compile Include="Assets\XLua\Examples\05_NoGc\NoGc.cs" />
+    <Compile Include="Assets\Scripts\Proto\LoginRequest.cs" />
     <Compile Include="Assets\XLua\Tutorial\LoadLuaScript\ByString\ByString.cs" />
     <Compile Include="Assets\XLua\Src\CodeEmit.cs" />
     <Compile Include="Assets\XLua\Tutorial\LuaCallCSharp\LuaCallCs.cs" />
@@ -371,6 +378,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>D:\framework\TestWeChat\LuaFramework_WeChat\Library\PackageCache\com.unity.visualscripting@1.9.1\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>D:\framework\TestWeChat\LuaFramework_WeChat\Assets\Plugins\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>D:\Unity Editor\2022.3.20f1\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
