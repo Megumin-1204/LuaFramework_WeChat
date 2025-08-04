@@ -5,7 +5,7 @@ Assets/
 │   │   ├── `EventManager.lua`     <!-- 自定义事件总线 -->  
 │   │   ├── `ModuleManager.lua`    <!-- 模块管理器，控制模块生命周期 -->
 │   │   ├── `ResourceManager.lua` 
-│   │   └── `TimerManager.lua`    
+│   │   └── `TimerManager.lua`    lo
 │   ├── **Entry/**                 
 │   │   └── `Main.lua`     
 │   ├── **Game/**                 
