@@ -47,11 +47,12 @@
   <ItemGroup>
     <Compile Include="Assets\XLua\Examples\08_Hotfix\Editor\HotfixTestCfg.cs" />
     <Compile Include="Assets\XLua\Editor\ExampleConfig.cs" />
-    <Compile Include="Assets\Editor\BuildAssetBundles.cs" />
     <Compile Include="Assets\XLua\Src\Editor\Generator.cs" />
     <Compile Include="Assets\XLua\Src\Editor\Hotfix.cs" />
     <Compile Include="Assets\XLua\Src\Editor\TemplateRef.cs" />
     <Compile Include="Assets\XLua\Editor\XLuaUnityDefaultConfig.cs" />
+    <Compile Include="Assets\Editor\UIPrefabExporter\UIPrefabExporter.cs" />
+    <Compile Include="Assets\Editor\BuildAssetBundles\BuildAssetBundles.cs" />
     <Compile Include="Assets\XLua\Examples\13_BuildFromCLI\Editor\BuildFromCLI.cs" />
     <Compile Include="Assets\XLua\Src\Editor\Report.cs" />
     <Compile Include="Assets\XLua\Src\Editor\LinkXmlGen\LinkXmlGen.cs" />
