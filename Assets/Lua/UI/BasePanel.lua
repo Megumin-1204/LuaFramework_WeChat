@@ -120,37 +120,79 @@ function BasePanel:HasComponent(name, compType)
 end
 
 -- ========== 通用事件绑定 ==========
-
-function BasePanel:AddListener(name, handler)
+function BasePanel:AddListener(name, handler, userParam)
     local go = self:GetObject(name)
     assert(go, "AddListener 找不到对象: " .. name)
+
+    -- 创建闭包包装回调，支持额外参数
+    local function createWrapper(handler, userParam)
+        return function(...)
+            -- 将事件参数和userParam一起传递给handler
+            if userParam ~= nil then
+                handler(..., userParam)
+            else
+                handler(...)
+            end
+        end
+    end
 
     -- Button
     local btn = go:GetComponent(typeof(CS.UnityEngine.UI.Button))
     if btn then
-        btn.onClick:AddListener(handler)
-        table.insert(self._listeners, {comp = btn, method = "onClick", fn = handler})
+        local wrapper = createWrapper(handler, userParam)
+        btn.onClick:AddListener(wrapper)
+        table.insert(self._listeners, {
+            comp = btn,
+            method = "onClick",
+            fn = wrapper,
+            original = handler, -- 保存原始回调用于解绑
+            userParam = userParam -- 保存用户参数
+        })
         return
     end
+
     -- Toggle
     local tgl = go:GetComponent(typeof(CS.UnityEngine.UI.Toggle))
     if tgl then
-        tgl.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp = tgl, method = "onValueChanged", fn = handler})
+        local wrapper = createWrapper(handler, userParam)
+        tgl.onValueChanged:AddListener(wrapper)
+        table.insert(self._listeners, {
+            comp = tgl,
+            method = "onValueChanged",
+            fn = wrapper,
+            original = handler,
+            userParam = userParam
+        })
         return
     end
+
     -- Slider
     local sld = go:GetComponent(typeof(CS.UnityEngine.UI.Slider))
     if sld then
-        sld.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp = sld, method = "onValueChanged", fn = handler})
+        local wrapper = createWrapper(handler, userParam)
+        sld.onValueChanged:AddListener(wrapper)
+        table.insert(self._listeners, {
+            comp = sld,
+            method = "onValueChanged",
+            fn = wrapper,
+            original = handler,
+            userParam = userParam
+        })
         return
     end
+
     -- InputField
     local input = go:GetComponent(typeof(CS.UnityEngine.UI.InputField))
     if input then
-        input.onValueChanged:AddListener(handler)
-        table.insert(self._listeners, {comp = input, method = "onValueChanged", fn = handler})
+        local wrapper = createWrapper(handler, userParam)
+        input.onValueChanged:AddListener(wrapper)
+        table.insert(self._listeners, {
+            comp = input,
+            method = "onValueChanged",
+            fn = wrapper,
+            original = handler,
+            userParam = userParam
+        })
         return
     end
 

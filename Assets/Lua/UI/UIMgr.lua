@@ -3,6 +3,7 @@
 
 local CS        = CS
 local BasePanel = require("UI.BasePanel")
+local PanelConfig = require("UI.PanelConfig")  -- 引入面板配置
 
 local UIMgr = {}
 local DEBUG = true
@@ -27,8 +28,19 @@ function UIMgr.ShowPanel(panelName, params)
     log("==> Enter ShowPanel:", panelName)
     local uiMgr = CS.UIManager.Instance
 
+    -- 检查面板是否在配置中
+    local config = PanelConfig[panelName]
+    if not config then
+        local errMsg = string.format("面板 '%s' 未在 PanelConfig 中配置", panelName)
+        log(errMsg)
+        if params.onFailed then
+            pcall(params.onFailed, errMsg)
+        end
+        return
+    end
+
     -- 调用专用接口 ShowPanelLua，避免与 Action 重载冲突
-    uiMgr:ShowPanelLua(panelName, function(go)
+    uiMgr:ShowPanelLua(config.prefabPath, function(go)
         -- C# 实例化回调
         log("ShowPanelLua callback, go =", go)
         if not go or go:Equals(nil) then
@@ -38,7 +50,9 @@ function UIMgr.ShowPanel(panelName, params)
         end
 
         -- 1) 加载 Lua 面板类
-        local ok, clsOrErr = pcall(require, "UI." .. panelName)
+        local scriptPath = config.scriptPath
+        log("加载面板脚本: " .. scriptPath)
+        local ok, clsOrErr = pcall(require, scriptPath)
         if not ok then
             log("require 面板类失败:", clsOrErr)
             CS.UnityEngine.Object.Destroy(go)
@@ -50,12 +64,18 @@ function UIMgr.ShowPanel(panelName, params)
         -- 2) 构造 Lua 面板实例（调用 ctor + OnCreate）
         local panel = panelClass.New(panelClass, go)
 
-        -- 3) 触发 OnEnable（并传入 params）
+        -- 3) 如果面板类没有指定层级，则使用配置中的层级
+        if not panelClass.Layer and config.layer then
+            panelClass.Layer = config.layer
+            log(string.format("设置面板 %s 层级为: %s", panelName, config.layer))
+        end
+
+        -- 4) 触发 OnEnable（并传入 params）
         if panel.OnEnable then
             pcall(function() panel:OnEnable(params) end)
         end
 
-        -- 4) 回调给上层
+        -- 5) 回调给上层
         if params.onLoaded then
             pcall(params.onLoaded, panel)
         end
@@ -66,7 +86,21 @@ end
 -- @param panelName string 面板名称
 function UIMgr.ClosePanel(panelName)
     assert(type(panelName) == "string" and #panelName > 0, "ClosePanel: panelName 必须为非空字符串")
+
+    -- 检查面板是否在配置中
+    if not PanelConfig[panelName] then
+        log(string.format("[WARNING] 关闭未配置的面板: %s", panelName))
+    end
+
     CS.UIManager.Instance:ClosePanel(panelName)
+end
+
+--- 获取面板层级
+function UIMgr.GetPanelLayer(panelName)
+    if PanelConfig[panelName] then
+        return PanelConfig[panelName].layer
+    end
+    return "Common" -- 默认层级
 end
 
 return UIMgr

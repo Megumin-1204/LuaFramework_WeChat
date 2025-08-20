@@ -2,9 +2,10 @@
 -- 框架启动入口，带最全日志
 
 -- 1) (可选) EmmyLua 调试
--- package.cpath = package.cpath .. ';.../emmy/windows/x64/?.dll'
--- local dbg = require("emmy_core")
--- dbg.tcpConnect("localhost", 9966)
+package.cpath = package.cpath .. ';C:/Users/Administrator/AppData/Roaming/JetBrains/Rider2024.3/plugins/EmmyLua/debugger/emmy/windows/x64/?.dll'
+local dbg = require('emmy_core')
+dbg.tcpConnect('localhost', 9966)
+
 
 -- 2) 全局 Class
 local Class = require("Core.Class")
@@ -66,7 +67,7 @@ NetworkManager.RegisterHandler(MsgID.HeartbeatResponse, function(_)
 end)
 
 -- 9) 注册业务模块
-local LoginModule = require("Game.Login.LoginController")
+local LoginModule = require("Game.Login.Control.LoginController")
 ModuleManager:RegisterBusiness("Login", LoginModule)
 -- 你还可以继续注册 Test/其他模块
 print("[Main] Business modules registered")

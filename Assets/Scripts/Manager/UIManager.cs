@@ -194,7 +194,7 @@ public class UIManager : MonoBehaviour
         );
         Log($"Prefab 加载结果（Lua）：{(prefab != null)} prefab={prefab}");
         if (prefab == null) {
-            prefab = Resources.Load<GameObject>("UI/" + panelName);
+            prefab = Resources.Load<GameObject>(panelName);
             if (prefab == null) {
                 Debug.LogError($"[UIManager] Resources.Load 也失败：{panelName}");
                 yield break;
